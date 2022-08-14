@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "clsx": "^1.2.1",
+    "history": "^5.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "rocon": "^1.2.8",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
