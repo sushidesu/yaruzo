@@ -10,6 +10,7 @@ export const Home = () => {
   const month = Array.from({ length: 30 }).map((_, i) =>
     createDateKey(2022, 8, i + 1)
   )
+  console.log("render home")
   return (
     <div className={clsx(styles["wrapper"])}>
       <div className={clsx(styles["boxes"])}>

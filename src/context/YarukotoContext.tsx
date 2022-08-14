@@ -4,7 +4,7 @@ import { Yarukoto, useYarukoto, createDateKey, DateKey } from "./yarukoto"
 
 type YarukotoContextValue = ReturnType<typeof useYarukoto>
 
-const YaurkotoContext = createContext<YarukotoContextValue>([
+const YarukotoContext = createContext<YarukotoContextValue>([
   {},
   () => {
     /* void */
@@ -35,10 +35,10 @@ export const YarukotoContextProvider = ({
     [createDateKey(2022, 8, 16)]: [],
   })
   return (
-    <YaurkotoContext.Provider value={value}>
+    <YarukotoContext.Provider value={value}>
       {children}
-    </YaurkotoContext.Provider>
+    </YarukotoContext.Provider>
   )
 }
 
-export const useYarukotoContext = () => useContext(YaurkotoContext)
+export const useYarukotoContext = () => useContext(YarukotoContext)

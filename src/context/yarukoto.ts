@@ -27,9 +27,10 @@ export type Yarukoto = {
 
 type YarukotoMap = Record<DateKey, Yarukoto[]>
 
-type DispatchYarukoto =
+type YarukotoAction =
   | {
       type: "add"
+      id: string
       key: DateKey
       name: string
     }
@@ -44,18 +45,23 @@ type DispatchYarukoto =
       id: string
     }
 
-const reducer: Reducer<YarukotoMap, DispatchYarukoto> = (state, action) => {
+const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
   switch (action.type) {
     case "add": {
       const target = state[action.key]
-      const item: Yarukoto = {
-        id: uuidv4(),
-        name: action.name,
-        todoAt: action.key,
-        completedAt: undefined,
+      const duplicate = target?.find((a) => a.id === action.id) !== undefined
+      if (duplicate) {
+        return { ...state }
+      } else {
+        const item: Yarukoto = {
+          id: action.id,
+          name: action.name,
+          todoAt: action.key,
+          completedAt: undefined,
+        }
+        state[action.key] = target === undefined ? [item] : [...target, item]
+        return { ...state }
       }
-      state[action.key] = target === undefined ? [item] : [...target, item]
-      return state
     }
     case "complete": {
       const target = state[action.key]
@@ -71,14 +77,14 @@ const reducer: Reducer<YarukotoMap, DispatchYarukoto> = (state, action) => {
             }
           : y
       })
-      return state
+      return { ...state }
     }
     case "remove": {
       const target = state[action.key]
       if (target === undefined) return state
 
       state[action.key] = target.filter((y) => y.id !== action.id)
-      return state
+      return { ...state }
     }
   }
 }
@@ -88,3 +94,5 @@ const reducer: Reducer<YarukotoMap, DispatchYarukoto> = (state, action) => {
 export const useYarukoto = (init?: YarukotoMap) => {
   return useReducer(reducer, init ?? {})
 }
+
+export const generateId = () => uuidv4()
