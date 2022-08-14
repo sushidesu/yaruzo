@@ -11,8 +11,7 @@ export const Home = () => {
     createDateKey(2022, 8, i + 1)
   )
   return (
-    <div>
-      <h1>This is Yaruzo</h1>
+    <div className={clsx(styles["wrapper"])}>
       <div className={clsx(styles["boxes"])}>
         {month.map((key) => {
           const y = yarukotoMap[key]
