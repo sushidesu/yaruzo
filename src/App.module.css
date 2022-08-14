@@ -1,0 +1,29 @@
+.wrapper {
+  max-width: 768px;
+  padding: 1rem;
+  margin: 0 auto;
+}
+
+.items {
+  margin-top: 2rem;
+}
+
+.item {
+  display: flex;
+  column-gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0.2rem 0.4rem;
+}
+
+.item-actions {
+  display: flex;
+  column-gap: 0.2rem;
+}
+
+.item + .item {
+  margin-top: 0.5rem;
+}
+
+.completed {
+  text-decoration: line-through;
+}

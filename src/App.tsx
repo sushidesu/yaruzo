@@ -1,5 +1,8 @@
 import { useReducer, Reducer, Dispatch, useState, useCallback } from "react"
 import { v4 as uuidv4 } from "uuid"
+import { clsx } from "clsx"
+
+import styles from "./App.module.css"
 
 export const App = () => {
   return <Server />
@@ -113,13 +116,13 @@ const Client = (props: ClientProps): JSX.Element => {
   )
 
   return (
-    <div>
+    <div className={clsx(styles["wrapper"])}>
       <h1>Yaruzo</h1>
       <form onSubmit={handleSubmit}>
         <input value={text} onChange={handleChange} />
         <button type={"submit"}>ADD</button>
       </form>
-      <ul>
+      <ul className={clsx(styles["items"])}>
         {yarukotos.map((yarukoto) => (
           <Item
             key={yarukoto.id}
@@ -144,16 +147,12 @@ const Item = (props: ItemProps): JSX.Element => {
   const { name, completedAt, onClickRemove, onClickComplete } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li>
-      <p
-        style={{
-          textDecoration: done ? "line-through" : undefined,
-        }}
-      >
-        {name}
-      </p>
-      {!done && <button onClick={onClickComplete}>DONE</button>}
-      <button onClick={onClickRemove}>REMOVE</button>
+    <li className={clsx(styles["item"], done && styles["completed"])}>
+      <p>{name}</p>
+      <div className={clsx(styles["item-actions"])}>
+        {!done && <button onClick={onClickComplete}>DONE</button>}
+        <button onClick={onClickRemove}>REMOVE</button>
+      </div>
     </li>
   )
 }
