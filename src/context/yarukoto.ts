@@ -13,7 +13,7 @@ export const createDateKey = (y: number, m: number, d: number): DateKey =>
 export type Timestamp = number & {
   __brand: "timestamp"
 }
-const createTimeStamp = (value: number): Timestamp => value as Timestamp
+export const createTimeStamp = (value: number): Timestamp => value as Timestamp
 const now = () => createTimeStamp(Date.now())
 
 export type Yarukoto = {

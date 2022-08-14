@@ -1,0 +1,26 @@
+.boxes {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 0.4rem;
+  column-gap: 0.4rem;
+}
+
+.box {
+  --c-gray: #dedede;
+  --c-text: #333;
+
+  padding: 1rem;
+  color: var(--c-text);
+  border: 1px solid var(--c-gray);
+}
+
+.box-link {
+  text-decoration: none;
+}
+
+.box:hover {
+  --c-shadow: #ededed;
+
+  background-color: var(--c-shadow);
+}

@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react"
-import { useYarukoto } from "./yarukoto"
+import { v4 as uuidv4 } from "uuid"
+import { Yarukoto, useYarukoto, createDateKey, DateKey } from "./yarukoto"
 
 type YarukotoContextValue = ReturnType<typeof useYarukoto>
 
@@ -10,12 +11,29 @@ const YaurkotoContext = createContext<YarukotoContextValue>([
   },
 ])
 
+const gen = (name: string, key: DateKey): Yarukoto => ({
+  id: uuidv4(),
+  name,
+  todoAt: key,
+  completedAt: undefined,
+})
+
 export const YarukotoContextProvider = ({
   children,
 }: {
   children: React.ReactNode
 }): JSX.Element => {
-  const value = useYarukoto()
+  const value = useYarukoto({
+    [createDateKey(2022, 8, 13)]: [],
+    [createDateKey(2022, 8, 14)]: [
+      gen("アガルート環境構築", createDateKey(2022, 8, 14)),
+      gen("レンジ注文", createDateKey(2022, 8, 14)),
+      gen("歯を磨く", createDateKey(2022, 8, 14)),
+      gen("風呂に入る", createDateKey(2022, 8, 14)),
+    ],
+    [createDateKey(2022, 8, 15)]: [],
+    [createDateKey(2022, 8, 16)]: [],
+  })
   return (
     <YaurkotoContext.Provider value={value}>
       {children}
