@@ -1,6 +1,6 @@
 import Rocon, { useRoutes } from "rocon/react"
-import { Home } from "../pages/Home"
-import { Yarukoto } from "../pages/Yarukoto"
+import Home from "../components/pages/Home"
+import Yarukoto from "../components/pages/Yarukoto"
 
 export const routes = Rocon.Path()
   .exact({
