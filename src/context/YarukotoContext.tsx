@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react"
 import { v4 as uuidv4 } from "uuid"
-import { Yarukoto, useYarukoto, createDateKey, DateKey } from "./yarukoto"
+import { Task, createDateKey, DateKey, now } from "../model/task"
+import { useYarukoto } from "./yarukoto"
 
 type YarukotoContextValue = ReturnType<typeof useYarukoto>
 
@@ -11,10 +12,11 @@ const YarukotoContext = createContext<YarukotoContextValue>([
   },
 ])
 
-const gen = (name: string, key: DateKey): Yarukoto => ({
+const gen = (name: string, key: DateKey): Task => ({
   id: uuidv4(),
   name,
   todoAt: key,
+  createdAt: now(),
   completedAt: undefined,
 })
 

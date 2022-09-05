@@ -1,5 +1,100 @@
 import { useReducer, Reducer } from "react"
-import { Task, DateKey, now } from "../model/task"
+import { kvsEnvStorage } from "@kvs/env"
+import {
+  Task,
+  DateKey,
+  now,
+  Timestamp,
+  generateId,
+  createDateKey,
+} from "../model/task"
+import useSWR, { KeyedMutator, SWRResponse } from "swr"
+
+type TasksSchema = Record<
+  string,
+  {
+    id: string
+    name: string
+    todoAt: DateKey
+    completedAt: Timestamp | null
+    createdAt: Timestamp
+  }
+>
+
+const tasksStorage = () =>
+  kvsEnvStorage<TasksSchema>({
+    name: "tasks",
+    version: 1,
+    upgrade: async ({ kvs, oldVersion }) => {
+      if (oldVersion < 1) {
+        const id = generateId()
+        kvs.set(id, {
+          id,
+          name: "やるぞ",
+          createdAt: now(),
+          todoAt: createDateKey(2022, 9, 10),
+          completedAt: null,
+        })
+      }
+    },
+  })
+
+export const useTasks = (): [Task[], KeyedMutator<Task[]>] => {
+  const response = useSWR(
+    "tasks",
+    async () => {
+      const storage = await tasksStorage()
+      const tasks: Task[] = []
+      for await (const [_, value] of storage) {
+        tasks.push({
+          id: value.id,
+          name: value.name,
+          todoAt: value.todoAt,
+          createdAt: value.createdAt,
+          completedAt: value.completedAt ?? undefined,
+        })
+      }
+      return tasks
+    },
+    {
+      suspense: true,
+    }
+  )
+  return [response.data as Task[], response.mutate]
+}
+
+export const createTask = async (task: Task) => {
+  const storage = await tasksStorage()
+  storage.set(task.id, {
+    id: task.id,
+    name: task.name,
+    todoAt: task.todoAt,
+    createdAt: task.createdAt,
+    completedAt: task.completedAt ?? null,
+  })
+}
+
+export const completeTask = async (id: string) => {
+  const storage = await tasksStorage()
+  const target = await storage.get(id)
+  if (target !== undefined) {
+    await storage.set(target.id, {
+      ...target,
+      completedAt: now(),
+    })
+  }
+}
+
+export const uncompleteTask = async (id: string) => {
+  const storage = await tasksStorage()
+  const target = await storage.get(id)
+  if (target !== undefined) {
+    await storage.set(target.id, {
+      ...target,
+      completedAt: null,
+    })
+  }
+}
 
 type TaskMap = Record<DateKey, Task[]>
 

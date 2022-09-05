@@ -1,14 +1,14 @@
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback } from "react"
 import { clsx } from "clsx"
-import {
-  DateKey,
-  generateId,
-  getDate,
-  createDateKey,
-} from "../../../model/task"
-import { useYarukotoContext } from "../../../context/YarukotoContext"
+import { DateKey, generateId, now, today } from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
+import {
+  useTasks,
+  createTask,
+  completeTask,
+  uncompleteTask,
+} from "../../../context/yarukoto"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -16,11 +16,7 @@ type YarukotoProps = {
 
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
-  const [yarukotoMap, dispatch] = useYarukotoContext()
-  const yarukotos = useMemo(
-    () => yarukotoMap[dateKey] ?? [],
-    [yarukotoMap, dateKey]
-  )
+  const [tasks, mutate] = useTasks()
 
   const [text, setText] = useState("")
 
@@ -32,66 +28,73 @@ export const Yarukoto = (props: YarukotoProps) => {
   )
 
   const handleSubmit = useCallback<React.FormEventHandler<HTMLFormElement>>(
-    (e) => {
+    async (e) => {
       e.preventDefault()
       console.log("submit")
       const id = generateId()
-      dispatch({
-        type: "add",
+      await createTask({
         id,
-        key: dateKey,
         name: text,
+        todoAt: today(),
+        createdAt: now(),
+        completedAt: undefined,
       })
+      await mutate()
       setText("")
     },
     [text]
   )
 
   const handleRemove = useCallback(
-    (id: string) => () => {
-      dispatch({
-        type: "remove",
-        key: dateKey,
-        id,
-      })
+    (_id: string) => () => {
+      console.log("remove")
+      //      dispatch({
+      //        type: "remove",
+      //        key: dateKey,
+      //        id,
+      //      })
     },
     []
   )
 
   const handleComplete = useCallback(
-    (id: string) => () => {
-      console.log("click!")
-      dispatch({
-        type: "complete",
-        key: dateKey,
-        id,
-      })
+    (id: string) => async () => {
+      await completeTask(id)
+      await mutate()
+    },
+    []
+  )
+
+  const handleUncomplete = useCallback(
+    (id: string) => async () => {
+      await uncompleteTask(id)
+      await mutate()
     },
     []
   )
 
   const handleClickMoveNext = useCallback(
-    (id: string) => () => {
-      const { y, m, d } = getDate(dateKey)
-      dispatch({
-        type: "move",
-        id,
-        from: dateKey,
-        to: createDateKey(y, m, d + 1),
-      })
+    (_id: string) => () => {
+      //      const { y, m, d } = getDate(dateKey)
+      //      dispatch({
+      //        type: "move",
+      //        id,
+      //        from: dateKey,
+      //        to: createDateKey(y, m, d + 1),
+      //      })
     },
     []
   )
 
   const handleClickMovePrev = useCallback(
-    (id: string) => () => {
-      const { y, m, d } = getDate(dateKey)
-      dispatch({
-        type: "move",
-        id,
-        from: dateKey,
-        to: createDateKey(y, m, d - 1),
-      })
+    (_id: string) => () => {
+      //      const { y, m, d } = getDate(dateKey)
+      //      dispatch({
+      //        type: "move",
+      //        id,
+      //        from: dateKey,
+      //        to: createDateKey(y, m, d - 1),
+      //      })
     },
     []
   )
@@ -104,23 +107,25 @@ export const Yarukoto = (props: YarukotoProps) => {
         <button type={"submit"}>ADD</button>
       </form>
       <ul className={clsx(styles["items"])}>
-        {yarukotos.map((yarukoto) =>
-          yarukoto.todoAt === dateKey ? (
+        {tasks.map((task) =>
+          task.todoAt === dateKey ? (
             <Item
-              key={yarukoto.id}
-              name={yarukoto.name}
-              completedAt={yarukoto.completedAt}
-              onClickRemove={handleRemove(yarukoto.id)}
-              onClickComplete={handleComplete(yarukoto.id)}
-              onClickMoveNext={handleClickMoveNext(yarukoto.id)}
-              onClickMovePrev={handleClickMovePrev(yarukoto.id)}
+              key={task.id}
+              name={task.name}
+              completedAt={task.completedAt}
+              onClickRemove={handleRemove(task.id)}
+              onClickComplete={handleComplete(task.id)}
+              onClickUncomplete={handleUncomplete(task.id)}
+              onClickMoveNext={handleClickMoveNext(task.id)}
+              onClickMovePrev={handleClickMovePrev(task.id)}
             />
           ) : (
             <ItemNotNow
-              key={yarukoto.id}
-              name={yarukoto.name}
-              completedAt={yarukoto.completedAt}
-              onClickComplete={handleComplete(yarukoto.id)}
+              key={task.id}
+              name={task.name}
+              completedAt={task.completedAt}
+              onClickComplete={handleComplete(task.id)}
+              onClickUncomplete={handleUncomplete(task.id)}
             />
           )
         )}
@@ -134,6 +139,7 @@ type ItemProps = {
   completedAt: number | undefined
   onClickRemove: () => void
   onClickComplete: () => void
+  onClickUncomplete: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
 }
@@ -144,6 +150,7 @@ const Item = (props: ItemProps): JSX.Element => {
     completedAt,
     onClickRemove,
     onClickComplete,
+    onClickUncomplete,
     onClickMoveNext,
     onClickMovePrev,
   } = props
@@ -153,6 +160,7 @@ const Item = (props: ItemProps): JSX.Element => {
       <p>{name}</p>
       <div className={clsx(styles["item-actions"])}>
         {!done && <button onClick={onClickComplete}>DONE</button>}
+        {done && <button onClick={onClickUncomplete}>UNDO</button>}
         <button onClick={onClickRemove}>REMOVE</button>
         <button onClick={onClickMovePrev}>←</button>
         <button onClick={onClickMoveNext}>→</button>
@@ -165,9 +173,10 @@ type ItemNotNowProps = {
   name: string
   completedAt: number | undefined
   onClickComplete: () => void
+  onClickUncomplete: () => void
 }
 const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
-  const { name, completedAt, onClickComplete } = props
+  const { name, completedAt, onClickComplete, onClickUncomplete } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <li
@@ -180,6 +189,7 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
       <p>{name}</p>
       <div className={clsx(styles["item-actions"])}>
         {!done && <button onClick={onClickComplete}>DONE</button>}
+        {done && <button onClick={onClickUncomplete}>UNDO</button>}
       </div>
     </li>
   )

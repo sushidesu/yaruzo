@@ -22,6 +22,10 @@ const zpad = (v: number, n: number) => v.toString().padStart(n, "0")
 
 export const createDateKey = (y: number, m: number, d: number): DateKey =>
   `${zpad(y, 4)}-${zpad(m, 2)}-${zpad(d, 2)}` as DateKey
+export const today = (): DateKey => {
+  const d = new Date()
+  return createDateKey(d.getFullYear(), d.getMonth() + 1, d.getDate())
+}
 
 export const getDate = (
   key: DateKey

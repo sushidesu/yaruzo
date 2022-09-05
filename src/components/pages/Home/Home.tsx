@@ -1,7 +1,7 @@
 import { clsx } from "clsx"
 import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
-import { createDateKey } from "../../../context/yarukoto"
+import { createDateKey } from "../../../model/task"
 import { useYarukotoContext } from "../../../context/YarukotoContext"
 import styles from "./Home.module.css"
 
