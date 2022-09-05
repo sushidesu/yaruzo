@@ -1,31 +1,7 @@
 import { useReducer, Reducer } from "react"
-import { v4 as uuidv4 } from "uuid"
+import { Task, DateKey, now } from "../model/task"
 
-/* ------------------ */
-
-export type DateKey = string & {
-  __brand: "dateKey"
-}
-const zpad = (v: number, n: number) => v.toString().padStart(n, "0")
-export const createDateKey = (y: number, m: number, d: number): DateKey =>
-  `${zpad(y, 4)}-${zpad(m, 2)}-${zpad(d, 2)}` as DateKey
-
-export type Timestamp = number & {
-  __brand: "timestamp"
-}
-export const createTimeStamp = (value: number): Timestamp => value as Timestamp
-const now = () => createTimeStamp(Date.now())
-
-export type Yarukoto = {
-  id: string
-  name: string
-  todoAt: DateKey
-  completedAt: Timestamp | undefined
-}
-
-/* ------------------ */
-
-type YarukotoMap = Record<DateKey, Yarukoto[]>
+type TaskMap = Record<DateKey, Task[]>
 
 type YarukotoAction =
   | {
@@ -44,8 +20,14 @@ type YarukotoAction =
       key: DateKey
       id: string
     }
+  | {
+      type: "move"
+      id: string
+      from: DateKey
+      to: DateKey
+    }
 
-const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
+const reducer: Reducer<TaskMap, YarukotoAction> = (state, action) => {
   switch (action.type) {
     case "add": {
       const target = state[action.key]
@@ -53,11 +35,12 @@ const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
       if (duplicate) {
         return { ...state }
       } else {
-        const item: Yarukoto = {
+        const item: Task = {
           id: action.id,
           name: action.name,
           todoAt: action.key,
           completedAt: undefined,
+          createdAt: now(),
         }
         state[action.key] = target === undefined ? [item] : [...target, item]
         return { ...state }
@@ -66,9 +49,9 @@ const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
     case "complete": {
       const target = state[action.key]
 
-      if (target === undefined) return state
+      if (target === undefined) return { ...state }
 
-      state[action.key] = target.map<Yarukoto>((y) => {
+      state[action.key] = target.map<Task>((y) => {
         return y.id === action.id
           ? {
               ...y,
@@ -81,9 +64,35 @@ const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
     }
     case "remove": {
       const target = state[action.key]
-      if (target === undefined) return state
+      if (target === undefined) return { ...state }
 
       state[action.key] = target.filter((y) => y.id !== action.id)
+      return { ...state }
+    }
+    case "move": {
+      const from = state[action.from]
+      if (from === undefined) return { ...state }
+
+      const item = from.find((i) => i.id === action.id)
+      if (item === undefined) return { ...state }
+
+      // todoAt を action.to にする
+      const newItem: Task = {
+        ...item,
+        todoAt: action.to,
+      }
+      state[action.from] = from.map((i) => (i.id === action.id ? newItem : i))
+
+      // action.to にコピーする
+      const to = state[action.to]
+      const duplicate = to?.find((a) => a.id === action.id)
+      state[action.to] =
+        to === undefined
+          ? [newItem]
+          : duplicate
+          ? to.map((i) => (i.id === action.id ? newItem : i))
+          : [...to, newItem]
+
       return { ...state }
     }
   }
@@ -91,8 +100,6 @@ const reducer: Reducer<YarukotoMap, YarukotoAction> = (state, action) => {
 
 /* ------------------ */
 
-export const useYarukoto = (init?: YarukotoMap) => {
+export const useYarukoto = (init?: TaskMap) => {
   return useReducer(reducer, init ?? {})
 }
-
-export const generateId = () => uuidv4()

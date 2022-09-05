@@ -27,3 +27,7 @@
 .completed {
   text-decoration: line-through;
 }
+
+.not-now {
+  color: #a1a1a1;
+}
