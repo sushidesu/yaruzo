@@ -8,7 +8,7 @@ import {
   generateId,
   createDateKey,
 } from "../model/task"
-import useSWR, { KeyedMutator, SWRResponse } from "swr"
+import useSWR, { KeyedMutator } from "swr"
 
 type TasksSchema = Record<
   string,
@@ -54,7 +54,7 @@ export const useTasks = (): [Task[], KeyedMutator<Task[]>] => {
           completedAt: value.completedAt ?? undefined,
         })
       }
-      return tasks
+      return tasks.sort((a, b) => a.createdAt - b.createdAt)
     },
     {
       suspense: true,
