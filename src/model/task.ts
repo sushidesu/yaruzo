@@ -1,3 +1,4 @@
+import dayjs, { Dayjs } from "dayjs"
 import { v4 as uuidv4 } from "uuid"
 
 export type Task = {
@@ -27,21 +28,11 @@ export const today = (): DateKey => {
   return createDateKey(d.getFullYear(), d.getMonth() + 1, d.getDate())
 }
 
-export const getDate = (
-  key: DateKey
-): {
-  y: number
-  m: number
-  d: number
-} => {
-  const y = Number(key.slice(0, 4))
-  const m = Number(key.slice(5, 7))
-  const d = Number(key.slice(8))
-  return {
-    y,
-    m,
-    d,
-  }
+export const keyToDayjs = (key: DateKey): Dayjs => {
+  return dayjs(key, "yyyy-MM-dd")
 }
+
+export const dayjsToKey = (day: Dayjs): DateKey =>
+  createDateKey(day.year(), day.month() + 1, day.date())
 
 export const generateId = () => uuidv4()
