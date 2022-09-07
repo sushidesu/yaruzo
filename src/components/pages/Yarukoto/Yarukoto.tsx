@@ -1,6 +1,13 @@
-import { useState, useCallback } from "react"
+import React, { useState, useCallback } from "react"
 import { clsx } from "clsx"
-import { DateKey, generateId, now, today } from "../../../model/task"
+import {
+  DateKey,
+  generateId,
+  now,
+  today,
+  keyToDayjs,
+  dayjsToKey,
+} from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
@@ -8,6 +15,9 @@ import {
   createTask,
   completeTask,
   uncompleteTask,
+  moveTask,
+  removeTask,
+  renameTask,
 } from "../../../context/yarukoto"
 
 type YarukotoProps = {
@@ -46,13 +56,9 @@ export const Yarukoto = (props: YarukotoProps) => {
   )
 
   const handleRemove = useCallback(
-    (_id: string) => () => {
-      console.log("remove")
-      //      dispatch({
-      //        type: "remove",
-      //        key: dateKey,
-      //        id,
-      //      })
+    (id: string) => async () => {
+      await removeTask(id)
+      await mutate()
     },
     []
   )
@@ -73,30 +79,31 @@ export const Yarukoto = (props: YarukotoProps) => {
     []
   )
 
-  const handleClickMoveNext = useCallback(
-    (_id: string) => () => {
-      //      const { y, m, d } = getDate(dateKey)
-      //      dispatch({
-      //        type: "move",
-      //        id,
-      //        from: dateKey,
-      //        to: createDateKey(y, m, d + 1),
-      //      })
+  const handleRename = useCallback(
+    (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
+      if (e.currentTarget.textContent !== null) {
+        await renameTask(id, e.currentTarget.textContent)
+      }
     },
     []
   )
 
-  const handleClickMovePrev = useCallback(
-    (_id: string) => () => {
-      //      const { y, m, d } = getDate(dateKey)
-      //      dispatch({
-      //        type: "move",
-      //        id,
-      //        from: dateKey,
-      //        to: createDateKey(y, m, d - 1),
-      //      })
+  const handleClickMoveNext = useCallback(
+    (id: string) => async () => {
+      const day = keyToDayjs(dateKey)
+      await moveTask(id, dayjsToKey(day.add(1, "day")))
+      await mutate()
     },
-    []
+    [dateKey]
+  )
+
+  const handleClickMovePrev = useCallback(
+    (id: string) => async () => {
+      const day = keyToDayjs(dateKey)
+      await moveTask(id, dayjsToKey(day.subtract(1, "day")))
+      await mutate()
+    },
+    [dateKey]
   )
 
   return (
@@ -118,6 +125,7 @@ export const Yarukoto = (props: YarukotoProps) => {
               onClickUncomplete={handleUncomplete(task.id)}
               onClickMoveNext={handleClickMoveNext(task.id)}
               onClickMovePrev={handleClickMovePrev(task.id)}
+              onBlurName={handleRename(task.id)}
             />
           ) : (
             <ItemNotNow
@@ -142,6 +150,7 @@ type ItemProps = {
   onClickUncomplete: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
+  onBlurName: React.FocusEventHandler<HTMLParagraphElement>
 }
 
 const Item = (props: ItemProps): JSX.Element => {
@@ -153,11 +162,18 @@ const Item = (props: ItemProps): JSX.Element => {
     onClickUncomplete,
     onClickMoveNext,
     onClickMovePrev,
+    onBlurName,
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <li className={clsx(styles["item"], done && styles["completed"])}>
-      <p>{name}</p>
+      {done ? (
+        <p>{name}</p>
+      ) : (
+        <p contentEditable onBlur={onBlurName} suppressContentEditableWarning>
+          {name}
+        </p>
+      )}
       <div className={clsx(styles["item-actions"])}>
         {!done && <button onClick={onClickComplete}>DONE</button>}
         {done && <button onClick={onClickUncomplete}>UNDO</button>}

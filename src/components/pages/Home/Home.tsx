@@ -3,14 +3,19 @@ import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
 import { createDateKey } from "../../../model/task"
 import { useYarukotoContext } from "../../../context/YarukotoContext"
+import dayjs from "dayjs"
 import styles from "./Home.module.css"
 
 export const Home = () => {
   const [yarukotoMap] = useYarukotoContext()
-  const month = Array.from({ length: 30 }).map((_, i) =>
-    createDateKey(2022, 8, i + 1)
-  )
-  console.log("render home")
+
+  const today = dayjs()
+  const start = today.startOf("month")
+  const end = today.endOf("month")
+  const month = [...range(start.date(), end.date() + 1)]
+    .map((d) => today.set("date", d))
+    .map((d) => createDateKey(d.year(), d.month() + 1, d.date()))
+
   return (
     <div className={clsx(styles["wrapper"])}>
       <div className={clsx(styles["boxes"])}>
@@ -33,4 +38,10 @@ export const Home = () => {
       </div>
     </div>
   )
+}
+
+function* range(start: number, end: number): Generator<number, void, unknown> {
+  for (let i = start; i < end; i++) {
+    yield i
+  }
 }
