@@ -96,6 +96,17 @@ export const uncompleteTask = async (id: string) => {
   }
 }
 
+export const moveTask = async (id: string, to: DateKey): Promise<void> => {
+  const storage = await tasksStorage()
+  const target = await storage.get(id)
+  if (target !== undefined) {
+    await storage.set(target.id, {
+      ...target,
+      todoAt: to,
+    })
+  }
+}
+
 type TaskMap = Record<DateKey, Task[]>
 
 type YarukotoAction =
