@@ -107,6 +107,22 @@ export const moveTask = async (id: string, to: DateKey): Promise<void> => {
   }
 }
 
+export const renameTask = async (id: string, name: string): Promise<void> => {
+  const storage = await tasksStorage()
+  const target = await storage.get(id)
+  if (target !== undefined) {
+    await storage.set(target.id, {
+      ...target,
+      name,
+    })
+  }
+}
+
+export const removeTask = async (id: string): Promise<void> => {
+  const storage = await tasksStorage()
+  await storage.delete(id)
+}
+
 type TaskMap = Record<DateKey, Task[]>
 
 type YarukotoAction =
