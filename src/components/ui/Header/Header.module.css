@@ -1,4 +1,10 @@
 .wrapper {
-  padding: 0.3rem 0.4rem;
+  padding: 8px 10px;
   background-color: var(--c-primary);
+}
+
+.title {
+  font-weight: bold;
+  color: var(--c-text);
+  text-decoration: none;
 }
