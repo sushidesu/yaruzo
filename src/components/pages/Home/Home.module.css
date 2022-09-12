@@ -2,6 +2,11 @@
   margin: 2rem 0;
 }
 
+.heading {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
 .boxes {
   display: grid;
   grid-template-rows: 1fr;
@@ -11,12 +16,17 @@
 }
 
 .box {
-  --c-gray: #dedede;
-  --c-text: #333;
-
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+  align-items: center;
   padding: 1rem;
   color: var(--c-text);
   border: 1px solid var(--c-gray);
+}
+
+.box.today {
+  font-weight: bold;
 }
 
 .box-link {
@@ -24,7 +34,26 @@
 }
 
 .box:hover {
-  --c-shadow: #ededed;
-
   background-color: var(--c-shadow);
+}
+
+.box-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 1rem;
+  border-radius: 50%;
+}
+
+.box.today .box-heading {
+  background-color: var(--c-primary);
+}
+
+.box-content {
+  display: flex;
+  flex: 1 1 36px;
+  align-items: center;
+  justify-content: center;
 }
