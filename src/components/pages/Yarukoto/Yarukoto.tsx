@@ -52,7 +52,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await mutate()
       setText("")
     },
-    [text]
+    [text, mutate]
   )
 
   const handleRemove = useCallback(
@@ -60,7 +60,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await removeTask(id)
       await mutate()
     },
-    []
+    [mutate]
   )
 
   const handleComplete = useCallback(
@@ -68,7 +68,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await completeTask(id)
       await mutate()
     },
-    []
+    [mutate]
   )
 
   const handleUncomplete = useCallback(
@@ -76,7 +76,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await uncompleteTask(id)
       await mutate()
     },
-    []
+    [mutate]
   )
 
   const handleRename = useCallback(
@@ -94,7 +94,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await moveTask(id, dayjsToKey(day.add(1, "day")))
       await mutate()
     },
-    [dateKey]
+    [dateKey, mutate]
   )
 
   const handleClickMovePrev = useCallback(
@@ -103,7 +103,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       await moveTask(id, dayjsToKey(day.subtract(1, "day")))
       await mutate()
     },
-    [dateKey]
+    [dateKey, mutate]
   )
 
   return (
