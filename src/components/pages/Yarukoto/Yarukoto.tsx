@@ -21,10 +21,12 @@ type YarukotoProps = {
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
   const today = keyToDayjs(dateKey)
+  const prevDay = today.subtract(1, "day")
+  const nextDay = today.add(1, "day")
   // 前後1日も含めて取得する
   const [tasks, mutate] = useTasks({
-    gte: dayjsToKey(today.subtract(1, "day")),
-    lt: dayjsToKey(today.add(2, "day")),
+    gte: dayjsToKey(prevDay),
+    lt: dayjsToKey(nextDay.add(1, "day")),
   })
 
   const [text, setText] = useState("")
@@ -97,36 +99,68 @@ export const Yarukoto = (props: YarukotoProps) => {
 
   return (
     <div className={clsx(styles["wrapper"])}>
-      <h1>{dateKey}</h1>
-      <form onSubmit={handleSubmit}>
-        <input value={text} onChange={handleChange} />
-        <button type={"submit"}>ADD</button>
-      </form>
-      <ul className={clsx(styles["items"])}>
-        {tasks.map((task) =>
-          task.todoAt === dateKey ? (
-            <Item
-              key={task.id}
-              name={task.name}
-              completedAt={task.completedAt}
-              onClickRemove={handleRemove(task.id)}
-              onClickComplete={handleComplete(task.id)}
-              onClickUncomplete={handleUncomplete(task.id)}
-              onClickMoveNext={handleClickMoveNext(task.id)}
-              onClickMovePrev={handleClickMovePrev(task.id)}
-              onBlurName={handleRename(task.id)}
-            />
-          ) : (
-            <ItemNotNow
-              key={task.id}
-              name={task.name}
-              completedAt={task.completedAt}
-              onClickComplete={handleComplete(task.id)}
-              onClickUncomplete={handleUncomplete(task.id)}
-            />
-          )
-        )}
-      </ul>
+      <div>
+        <h1>{dateKey}</h1>
+        <form onSubmit={handleSubmit}>
+          <input value={text} onChange={handleChange} />
+          <button type={"submit"}>ADD</button>
+        </form>
+      </div>
+
+      <div className={clsx(styles["day"])}>
+        <p className={clsx(styles["day-header"])}>{prevDay.format("M/D")}</p>
+        <ul className={clsx(styles["items"])}>
+          {tasks
+            .filter((t) => t.todoAt === dayjsToKey(prevDay))
+            .map((task) => (
+              <ItemNotNow
+                key={task.id}
+                name={task.name}
+                completedAt={task.completedAt}
+                onClickComplete={handleComplete(task.id)}
+                onClickUncomplete={handleUncomplete(task.id)}
+              />
+            ))}
+        </ul>
+      </div>
+
+      <div className={clsx(styles["day"])}>
+        <p className={clsx(styles["day-header"])}>{"Today"}</p>
+        <ul className={clsx(styles["items"])}>
+          {tasks
+            .filter((t) => t.todoAt === dayjsToKey(today))
+            .map((task) => (
+              <Item
+                key={task.id}
+                name={task.name}
+                completedAt={task.completedAt}
+                onClickRemove={handleRemove(task.id)}
+                onClickComplete={handleComplete(task.id)}
+                onClickUncomplete={handleUncomplete(task.id)}
+                onClickMoveNext={handleClickMoveNext(task.id)}
+                onClickMovePrev={handleClickMovePrev(task.id)}
+                onBlurName={handleRename(task.id)}
+              />
+            ))}
+        </ul>
+      </div>
+
+      <div className={clsx(styles["day"])}>
+        <p className={clsx(styles["day-header"])}>{nextDay.format("M/D")}</p>
+        <ul className={clsx(styles["items"])}>
+          {tasks
+            .filter((t) => t.todoAt === dayjsToKey(nextDay))
+            .map((task) => (
+              <ItemNotNow
+                key={task.id}
+                name={task.name}
+                completedAt={task.completedAt}
+                onClickComplete={handleComplete(task.id)}
+                onClickUncomplete={handleUncomplete(task.id)}
+              />
+            ))}
+        </ul>
+      </div>
     </div>
   )
 }

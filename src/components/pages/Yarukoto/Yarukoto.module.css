@@ -1,11 +1,25 @@
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2rem;
   max-width: 768px;
   padding: 1rem;
   margin: 0 auto;
 }
 
+.day {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+}
+
+.day-header {
+  font-size: 1.2rem;
+  color: var(--c-text);
+}
+
 .items {
-  margin-top: 2rem;
+  margin: 0;
 }
 
 .item {
