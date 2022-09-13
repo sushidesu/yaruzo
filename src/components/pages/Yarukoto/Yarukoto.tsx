@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react"
 import { clsx } from "clsx"
-import type { DateKey } from "../../../model/task"
+import { DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
@@ -20,7 +20,12 @@ type YarukotoProps = {
 
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
-  const [tasks, mutate] = useTasks()
+  const today = keyToDayjs(dateKey)
+  // 前後1日も含めて取得する
+  const [tasks, mutate] = useTasks({
+    gte: dayjsToKey(today.subtract(1, "day")),
+    lt: dayjsToKey(today.add(2, "day")),
+  })
 
   const [text, setText] = useState("")
 

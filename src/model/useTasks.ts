@@ -1,13 +1,24 @@
 import useSWR, { KeyedMutator } from "swr"
-import type { Task } from "./task"
+import type { DateKey, Task } from "./task"
 import { createTaskRepository } from "../infra/kvs/task-repository"
 
-export const useTasks = (): [Task[], KeyedMutator<Task[]>] => {
+type TasksQuery = {
+  gte: DateKey
+  lt: DateKey
+}
+
+const key = (query: TasksQuery) =>
+  ({
+    key: "tasks",
+    ...query,
+  } as const)
+
+export const useTasks = (query: TasksQuery): [Task[], KeyedMutator<Task[]>] => {
   const response = useSWR(
-    "tasks",
-    () => {
+    key(query),
+    ({ gte, lt }) => {
       const repo = createTaskRepository()
-      return repo.query()
+      return repo.query({ gte, lt })
     },
     {
       suspense: true,

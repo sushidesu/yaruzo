@@ -6,6 +6,7 @@ import {
   Timestamp,
   generateId,
   createDateKey,
+  keyToDayjs,
 } from "../../model/task"
 import { kvsEnvStorage } from "@kvs/env"
 
@@ -53,6 +54,15 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
     createdAt: value.createdAt,
   })
 
+  const getAll = async (): Promise<Task[]> => {
+    const storage = await tasksStorage()
+    const tasks: Task[] = []
+    for await (const [_, value] of storage) {
+      tasks.push(from(value))
+    }
+    return tasks.sort((a, b) => a.createdAt - b.createdAt)
+  }
+
   return {
     get: async (id) => {
       const storage = await tasksStorage()
@@ -60,13 +70,17 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
       return target ? from(target) : undefined
     },
 
-    query: async () => {
-      const storage = await tasksStorage()
-      const tasks: Task[] = []
-      for await (const [_, value] of storage) {
-        tasks.push(from(value))
-      }
-      return tasks.sort((a, b) => a.createdAt - b.createdAt)
+    query: async ({ gte, lt }) => {
+      const tasks = await getAll()
+      return tasks.filter((t) => {
+        const start = keyToDayjs(gte)
+        const end = keyToDayjs(lt)
+        const d = keyToDayjs(t.todoAt)
+        return (
+          (d.isSame(start, "date") || d.isAfter(start, "date")) &&
+          d.isBefore(end)
+        )
+      })
     },
 
     create: async (task) => {

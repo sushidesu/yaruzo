@@ -7,14 +7,17 @@ import dayjs from "dayjs"
 import styles from "./Home.module.css"
 
 export const Home = () => {
-  const [tasks] = useTasks()
-
   const today = dayjs()
   const start = today.startOf("month")
   const end = today.endOf("month")
   const month = [...range(start.date(), end.date() + 1)].map((d) =>
     today.set("date", d)
   )
+
+  const [tasks] = useTasks({
+    gte: dayjsToKey(start),
+    lt: dayjsToKey(end.add(1, "day")),
+  })
 
   return (
     <div className={clsx(styles["wrapper"])}>
