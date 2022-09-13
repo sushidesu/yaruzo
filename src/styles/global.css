@@ -15,5 +15,6 @@ body {
   --c-primary: #b0de52;
   --c-gray: #dedede;
   --c-text: #333;
+  --c-text-secondary: rgb(123 131 132);
   --c-shadow: #ededed;
 }

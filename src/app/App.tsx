@@ -1,13 +1,13 @@
 import { RoconRoot } from "rocon/react"
-import { YarukotoContextProvider } from "../context/YarukotoContext"
 import { Routes } from "./Router"
+import { NotFoundErrorBoundary } from "./NotFoundErrorBoundary"
 
 export const App = () => {
   return (
-    <YarukotoContextProvider>
-      <RoconRoot>
+    <RoconRoot>
+      <NotFoundErrorBoundary>
         <Routes />
-      </RoconRoot>
-    </YarukotoContextProvider>
+      </NotFoundErrorBoundary>
+    </RoconRoot>
   )
 }
