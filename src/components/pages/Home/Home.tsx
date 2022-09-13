@@ -2,7 +2,7 @@ import { clsx } from "clsx"
 import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
 import { dayjsToKey } from "../../../model/task"
-import { useTasks } from "../../../context/yarukoto"
+import { useTasks } from "../../../model/useTasks"
 import dayjs from "dayjs"
 import styles from "./Home.module.css"
 

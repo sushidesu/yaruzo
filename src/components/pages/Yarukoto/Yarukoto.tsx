@@ -1,24 +1,18 @@
 import React, { useState, useCallback } from "react"
 import { clsx } from "clsx"
-import {
-  DateKey,
-  generateId,
-  now,
-  today,
-  keyToDayjs,
-  dayjsToKey,
-} from "../../../model/task"
+import type { DateKey } from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
-  useTasks,
-  createTask,
+  createTaskToday,
   completeTask,
   uncompleteTask,
-  moveTask,
   removeTask,
   renameTask,
-} from "../../../context/yarukoto"
+  moveTaskPrev,
+  moveTaskNext,
+} from "../../../model/task-usecase"
+import { useTasks } from "../../../model/useTasks"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -40,15 +34,7 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleSubmit = useCallback<React.FormEventHandler<HTMLFormElement>>(
     async (e) => {
       e.preventDefault()
-      console.log("submit")
-      const id = generateId()
-      await createTask({
-        id,
-        name: text,
-        todoAt: today(),
-        createdAt: now(),
-        completedAt: undefined,
-      })
+      await createTaskToday(text)
       await mutate()
       setText("")
     },
@@ -90,20 +76,18 @@ export const Yarukoto = (props: YarukotoProps) => {
 
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
-      const day = keyToDayjs(dateKey)
-      await moveTask(id, dayjsToKey(day.add(1, "day")))
+      await moveTaskNext(id)
       await mutate()
     },
-    [dateKey, mutate]
+    [mutate]
   )
 
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
-      const day = keyToDayjs(dateKey)
-      await moveTask(id, dayjsToKey(day.subtract(1, "day")))
+      await moveTaskPrev(id)
       await mutate()
     },
-    [dateKey, mutate]
+    [mutate]
   )
 
   return (
