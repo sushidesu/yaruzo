@@ -52,10 +52,15 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
       version: 1,
       upgrade: async ({ kvs, oldVersion }) => {
         if (oldVersion < 1) {
-          const tasks = await tasksStorage()
+          const storage = await tasksStorage()
+          const tasks: TasksSchema[string][] = []
+          for await (const [_, value] of storage) {
+            tasks.push(value)
+          }
+          const sorted = tasks.sort((a, b) => a.createdAt - b.createdAt)
           let i = 0
-          for await (const [key] of tasks) {
-            kvs.set(key, i)
+          for (const task of sorted) {
+            await kvs.set(task.id, i)
             ++i
           }
         }
