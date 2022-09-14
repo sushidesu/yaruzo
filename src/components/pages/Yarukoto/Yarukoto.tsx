@@ -10,6 +10,8 @@ import {
   renameTask,
   moveTaskPrev,
   moveTaskNext,
+  moveTaskUp,
+  moveTaskDown,
 } from "../../../model/task-usecase"
 import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
@@ -91,6 +93,22 @@ export const Yarukoto = (props: YarukotoProps) => {
     [mutate]
   )
 
+  const handleClickMoveUp = useCallback(
+    (id: string) => async () => {
+      await moveTaskUp(id)
+      await mutate()
+    },
+    [mutate]
+  )
+
+  const handleClickMoveDown = useCallback(
+    (id: string) => async () => {
+      await moveTaskDown(id)
+      await mutate()
+    },
+    [mutate]
+  )
+
   return (
     <div className={clsx(styles["wrapper"])}>
       <div>
@@ -145,6 +163,8 @@ export const Yarukoto = (props: YarukotoProps) => {
                 onClickCheck={handleToggleComplete(task.id)}
                 onClickMoveNext={handleClickMoveNext(task.id)}
                 onClickMovePrev={handleClickMovePrev(task.id)}
+                onClickMoveUp={handleClickMoveUp(task.id)}
+                onClickMoveDown={handleClickMoveDown(task.id)}
                 onBlurName={handleRename(task.id)}
               />
             ))}
@@ -177,6 +197,8 @@ type ItemProps = {
   onClickCheck: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
+  onClickMoveUp: () => void
+  onClickMoveDown: () => void
   onBlurName: React.FocusEventHandler<HTMLParagraphElement>
 }
 
@@ -188,6 +210,8 @@ const Item = (props: ItemProps): JSX.Element => {
     onClickCheck,
     onClickMoveNext,
     onClickMovePrev,
+    onClickMoveUp,
+    onClickMoveDown,
     onBlurName,
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
@@ -219,6 +243,12 @@ const Item = (props: ItemProps): JSX.Element => {
           aria-label={"Move task to the next day"}
         >
           →
+        </button>
+        <button aria-label={"Move task up"} onClick={onClickMoveUp}>
+          ↑
+        </button>
+        <button aria-label={"Move task down"} onClick={onClickMoveDown}>
+          ↓
         </button>
       </div>
     </li>
