@@ -7,6 +7,12 @@
   margin: 0 auto;
 }
 
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .day {
   display: flex;
   flex-direction: column;

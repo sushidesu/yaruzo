@@ -13,6 +13,8 @@ import {
   moveTaskNext,
 } from "../../../model/task-usecase"
 import { useTasks } from "../../../model/useTasks"
+import { Link } from "rocon/react"
+import { routes_y } from "../../../app/Router"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -100,7 +102,21 @@ export const Yarukoto = (props: YarukotoProps) => {
   return (
     <div className={clsx(styles["wrapper"])}>
       <div>
-        <h1>{dateKey}</h1>
+        <div className={clsx(styles["heading"])}>
+          <Link
+            route={routes_y.anyRoute}
+            match={{ dateKey: dayjsToKey(prevDay) }}
+          >
+            Prev
+          </Link>
+          <h1>{today.format("MMMM D, YYYY")}</h1>
+          <Link
+            route={routes_y.anyRoute}
+            match={{ dateKey: dayjsToKey(nextDay) }}
+          >
+            Next
+          </Link>
+        </div>
         <form onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
           <button type={"submit"}>ADD</button>
