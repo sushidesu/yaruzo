@@ -22,19 +22,11 @@ export const createTaskToday = async (name: string) => {
   await repo.create(task)
 }
 
-export const completeTask = async (id: string) => {
+export const toggleCompleteTask = async (id: string) => {
   const repo = createTaskRepository()
   await repo.update(id, (prev) => ({
     ...prev,
-    completedAt: now(),
-  }))
-}
-
-export const uncompleteTask = async (id: string) => {
-  const repo = createTaskRepository()
-  await repo.update(id, (prev) => ({
-    ...prev,
-    completedAt: undefined,
+    completedAt: prev.completedAt === undefined ? now() : undefined,
   }))
 }
 

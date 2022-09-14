@@ -5,8 +5,7 @@ import { DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 import styles from "./Yarukoto.module.css"
 import {
   createTaskToday,
-  completeTask,
-  uncompleteTask,
+  toggleCompleteTask,
   removeTask,
   renameTask,
   moveTaskPrev,
@@ -59,17 +58,9 @@ export const Yarukoto = (props: YarukotoProps) => {
     [mutate]
   )
 
-  const handleComplete = useCallback(
+  const handleToggleComplete = useCallback(
     (id: string) => async () => {
-      await completeTask(id)
-      await mutate()
-    },
-    [mutate]
-  )
-
-  const handleUncomplete = useCallback(
-    (id: string) => async () => {
-      await uncompleteTask(id)
+      await toggleCompleteTask(id)
       await mutate()
     },
     [mutate]
@@ -134,8 +125,7 @@ export const Yarukoto = (props: YarukotoProps) => {
                 key={task.id}
                 name={task.name}
                 completedAt={task.completedAt}
-                onClickComplete={handleComplete(task.id)}
-                onClickUncomplete={handleUncomplete(task.id)}
+                onClickCheck={handleToggleComplete(task.id)}
               />
             ))}
         </ul>
@@ -152,8 +142,7 @@ export const Yarukoto = (props: YarukotoProps) => {
                 name={task.name}
                 completedAt={task.completedAt}
                 onClickRemove={handleRemove(task.id)}
-                onClickComplete={handleComplete(task.id)}
-                onClickUncomplete={handleUncomplete(task.id)}
+                onClickCheck={handleToggleComplete(task.id)}
                 onClickMoveNext={handleClickMoveNext(task.id)}
                 onClickMovePrev={handleClickMovePrev(task.id)}
                 onBlurName={handleRename(task.id)}
@@ -172,8 +161,7 @@ export const Yarukoto = (props: YarukotoProps) => {
                 key={task.id}
                 name={task.name}
                 completedAt={task.completedAt}
-                onClickComplete={handleComplete(task.id)}
-                onClickUncomplete={handleUncomplete(task.id)}
+                onClickCheck={handleToggleComplete(task.id)}
               />
             ))}
         </ul>
@@ -186,8 +174,7 @@ type ItemProps = {
   name: string
   completedAt: number | undefined
   onClickRemove: () => void
-  onClickComplete: () => void
-  onClickUncomplete: () => void
+  onClickCheck: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
   onBlurName: React.FocusEventHandler<HTMLParagraphElement>
@@ -198,8 +185,7 @@ const Item = (props: ItemProps): JSX.Element => {
     name,
     completedAt,
     onClickRemove,
-    onClickComplete,
-    onClickUncomplete,
+    onClickCheck,
     onClickMoveNext,
     onClickMovePrev,
     onBlurName,
@@ -207,10 +193,7 @@ const Item = (props: ItemProps): JSX.Element => {
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <li className={clsx(styles["item"])}>
-      <CompleteButton
-        complete={done}
-        onClick={done ? onClickUncomplete : onClickComplete}
-      />
+      <CompleteButton complete={done} onClick={onClickCheck} />
       {done ? (
         <p className={clsx(styles["item-name"], styles["completed"])}>{name}</p>
       ) : (
@@ -235,11 +218,10 @@ const Item = (props: ItemProps): JSX.Element => {
 type ItemNotNowProps = {
   name: string
   completedAt: number | undefined
-  onClickComplete: () => void
-  onClickUncomplete: () => void
+  onClickCheck: () => void
 }
 const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
-  const { name, completedAt, onClickComplete, onClickUncomplete } = props
+  const { name, completedAt, onClickCheck } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <li
@@ -249,11 +231,8 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
         styles["not-now"]
       )}
     >
+      <CompleteButton complete={done} onClick={onClickCheck} />
       <p>{name}</p>
-      <div className={clsx(styles["item-actions"])}>
-        {!done && <button onClick={onClickComplete}>DONE</button>}
-        {done && <button onClick={onClickUncomplete}>UNDO</button>}
-      </div>
     </li>
   )
 }
