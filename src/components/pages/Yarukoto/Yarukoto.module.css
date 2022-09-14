@@ -20,8 +20,20 @@
 }
 
 .day-header {
+  display: flex;
+  column-gap: 5px;
   font-size: 1.2rem;
   color: var(--c-text);
+}
+
+.day-header.today::after {
+  display: block;
+  width: 6px;
+  height: 6px;
+  content: "";
+  background-color: var(--c-primary);
+  border-radius: 50%;
+  transform: translateY(4px);
 }
 
 .items {

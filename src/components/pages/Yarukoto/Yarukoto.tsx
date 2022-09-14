@@ -141,7 +141,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       </div>
 
       <div className={clsx(styles["day"])}>
-        <p className={clsx(styles["day-header"])}>{"Today"}</p>
+        <p className={clsx(styles["day-header"], styles["today"])}>{"Today"}</p>
         <ul className={clsx(styles["items"])}>
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(today))
