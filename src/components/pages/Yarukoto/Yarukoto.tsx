@@ -205,9 +205,9 @@ const Item = (props: ItemProps): JSX.Element => {
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li className={clsx(styles["item"], done && styles["completed"])}>
+    <li className={clsx(styles["item"])}>
       {done ? (
-        <p>{name}</p>
+        <p className={clsx(styles["completed"])}>{name}</p>
       ) : (
         <p contentEditable onBlur={onBlurName} suppressContentEditableWarning>
           {name}
