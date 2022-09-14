@@ -1,0 +1,14 @@
+.wrapper {
+  --size: 24px;
+
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid var(--c-primary);
+  border-radius: 50%;
+}
+
+.wrapper.complete {
+  background-color: var(--c-primary);
+}

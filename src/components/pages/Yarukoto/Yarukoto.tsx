@@ -15,6 +15,7 @@ import {
 import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
+import { CompleteButton } from "../../feature/CompleteButton"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -206,16 +207,23 @@ const Item = (props: ItemProps): JSX.Element => {
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <li className={clsx(styles["item"])}>
+      <CompleteButton
+        complete={done}
+        onClick={done ? onClickUncomplete : onClickComplete}
+      />
       {done ? (
-        <p className={clsx(styles["completed"])}>{name}</p>
+        <p className={clsx(styles["item-name"], styles["completed"])}>{name}</p>
       ) : (
-        <p contentEditable onBlur={onBlurName} suppressContentEditableWarning>
+        <p
+          className={clsx(styles["item-name"])}
+          contentEditable
+          onBlur={onBlurName}
+          suppressContentEditableWarning
+        >
           {name}
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
-        {!done && <button onClick={onClickComplete}>DONE</button>}
-        {done && <button onClick={onClickUncomplete}>UNDO</button>}
         <button onClick={onClickRemove}>REMOVE</button>
         <button onClick={onClickMovePrev}>←</button>
         <button onClick={onClickMoveNext}>→</button>
