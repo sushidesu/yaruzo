@@ -208,8 +208,18 @@ const Item = (props: ItemProps): JSX.Element => {
       )}
       <div className={clsx(styles["item-actions"])}>
         <button onClick={onClickRemove}>REMOVE</button>
-        <button onClick={onClickMovePrev}>←</button>
-        <button onClick={onClickMoveNext}>→</button>
+        <button
+          onClick={onClickMovePrev}
+          aria-label={"Move task to the previous day"}
+        >
+          ←
+        </button>
+        <button
+          onClick={onClickMoveNext}
+          aria-label={"Move task to the next day"}
+        >
+          →
+        </button>
       </div>
     </li>
   )
