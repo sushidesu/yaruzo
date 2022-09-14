@@ -60,12 +60,12 @@ export const moveTaskPrev = async (id: string): Promise<void> => {
   })
 }
 
-export const moveTaskUp = async (id: string): Promise<void> => {
-  // TODO:
-}
-
-export const moveTaskDown = async (id: string): Promise<void> => {
-  // TODO:
+export const swapOrder = async (
+  leftId: string,
+  rightId: string
+): Promise<void> => {
+  const repo = createTaskRepository()
+  await repo.swapOrder(leftId, rightId)
 }
 
 export const renameTask = async (id: string, name: string): Promise<void> => {

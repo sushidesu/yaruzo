@@ -21,6 +21,12 @@ type TasksSchema = Record<
   }
 >
 
+type TaskOrderScheme = Record<string, number>
+
+type TaskSummaryScheme = {
+  count: number
+}
+
 export const createTaskRepository = (): TaskRepositoryInterface => {
   const tasksStorage = () =>
     kvsEnvStorage<TasksSchema>({
@@ -39,6 +45,39 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
         }
       },
     })
+
+  const getOrderStorage = () =>
+    kvsEnvStorage<TaskOrderScheme>({
+      name: "taskOrder",
+      version: 1,
+      upgrade: async ({ kvs, oldVersion }) => {
+        if (oldVersion < 1) {
+          const tasks = await tasksStorage()
+          let i = 0
+          for await (const [key] of tasks) {
+            kvs.set(key, i)
+            ++i
+          }
+        }
+      },
+    })
+
+  const summaryStorage = () =>
+    kvsEnvStorage<TaskSummaryScheme>({
+      name: "taskSummary",
+      version: 1,
+      upgrade: async ({ kvs, oldVersion }) => {
+        if (oldVersion < 1) {
+          const tasks = await tasksStorage()
+          let i = 0
+          for await (const _ of tasks) {
+            ++i
+          }
+          kvs.set("count", i)
+        }
+      },
+    })
+
   const to = (task: Task): TasksSchema[string] => ({
     id: task.id,
     name: task.name,
@@ -56,11 +95,27 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
 
   const getAll = async (): Promise<Task[]> => {
     const storage = await tasksStorage()
+    const orderStorage = await getOrderStorage()
+
+    const orders: Record<string, number> = {}
+    for await (const [key, value] of orderStorage) {
+      orders[key] = value
+    }
+
     const tasks: Task[] = []
     for await (const [_, value] of storage) {
       tasks.push(from(value))
     }
-    return tasks.sort((a, b) => a.createdAt - b.createdAt)
+
+    return tasks.sort((a, b) => {
+      const aOrder = orders[a.id]
+      const bOrder = orders[b.id]
+      if (aOrder === undefined || bOrder === undefined) {
+        return a.createdAt - b.createdAt
+      } else {
+        return aOrder - bOrder
+      }
+    })
   }
 
   return {
@@ -85,7 +140,16 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
 
     create: async (task) => {
       const storage = await tasksStorage()
-      storage.set(task.id, to(task))
+      const orders = await getOrderStorage()
+      const summary = await summaryStorage()
+
+      const count = await summary.get("count")
+      if (count === undefined) {
+        throw new Error("count not found")
+      }
+      await storage.set(task.id, to(task))
+      await orders.set(task.id, count)
+      await summary.set("count", count + 1)
     },
 
     update: async (id, mutator) => {
@@ -98,7 +162,22 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
 
     remove: async (id) => {
       const storage = await tasksStorage()
+      const orders = await getOrderStorage()
       await storage.delete(id)
+      await orders.delete(id)
+    },
+
+    swapOrder: async (leftId, rightId) => {
+      const orders = await getOrderStorage()
+      const left = await orders.get(leftId)
+      const right = await orders.get(rightId)
+
+      if (left === undefined || right === undefined) {
+        return
+      }
+
+      await orders.set(leftId, right)
+      await orders.set(rightId, left)
     },
   }
 }

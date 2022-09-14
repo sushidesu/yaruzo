@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react"
 import { clsx } from "clsx"
-import { DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
+import { Task, DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
@@ -10,8 +10,7 @@ import {
   renameTask,
   moveTaskPrev,
   moveTaskNext,
-  moveTaskUp,
-  moveTaskDown,
+  swapOrder,
 } from "../../../model/task-usecase"
 import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
@@ -94,16 +93,28 @@ export const Yarukoto = (props: YarukotoProps) => {
   )
 
   const handleClickMoveUp = useCallback(
-    (id: string) => async () => {
-      await moveTaskUp(id)
+    (id: string, index: number, range: Task[]) => async () => {
+      // 1つ前のタスクと場所を交換する をやる
+      const prev = range[index - 1]
+      if (prev === undefined) {
+        // 先頭なので何もしない
+        return
+      }
+      await swapOrder(prev.id, id)
       await mutate()
     },
     [mutate]
   )
 
   const handleClickMoveDown = useCallback(
-    (id: string) => async () => {
-      await moveTaskDown(id)
+    (id: string, index: number, range: Task[]) => async () => {
+      // 1つ後のタスクと場所を交換する をやる
+      const next = range[index + 1]
+      if (next === undefined) {
+        // 最後尾なので何もしない
+        return
+      }
+      await swapOrder(id, next.id)
       await mutate()
     },
     [mutate]
@@ -154,7 +165,7 @@ export const Yarukoto = (props: YarukotoProps) => {
         <ul className={clsx(styles["items"])}>
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(today))
-            .map((task) => (
+            .map((task, i, range) => (
               <Item
                 key={task.id}
                 name={task.name}
@@ -163,8 +174,8 @@ export const Yarukoto = (props: YarukotoProps) => {
                 onClickCheck={handleToggleComplete(task.id)}
                 onClickMoveNext={handleClickMoveNext(task.id)}
                 onClickMovePrev={handleClickMovePrev(task.id)}
-                onClickMoveUp={handleClickMoveUp(task.id)}
-                onClickMoveDown={handleClickMoveDown(task.id)}
+                onClickMoveUp={handleClickMoveUp(task.id, i, range)}
+                onClickMoveDown={handleClickMoveDown(task.id, i, range)}
                 onBlurName={handleRename(task.id)}
               />
             ))}
