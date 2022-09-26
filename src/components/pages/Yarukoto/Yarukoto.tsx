@@ -16,6 +16,7 @@ import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
 import { CompleteButton } from "../../feature/CompleteButton"
+import { Button } from "../../ui/Button"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -140,7 +141,9 @@ export const Yarukoto = (props: YarukotoProps) => {
         </div>
         <form onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
-          <button type={"submit"}>ADD</button>
+          <Button variant={"primary"} type={"submit"}>
+            ADD
+          </Button>
         </form>
       </div>
 
@@ -242,25 +245,25 @@ const Item = (props: ItemProps): JSX.Element => {
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
-        <button onClick={onClickRemove}>REMOVE</button>
-        <button
+        <Button onClick={onClickRemove}>REMOVE</Button>
+        <Button
           onClick={onClickMovePrev}
           aria-label={"Move task to the previous day"}
         >
           ←
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onClickMoveNext}
           aria-label={"Move task to the next day"}
         >
           →
-        </button>
-        <button aria-label={"Move task up"} onClick={onClickMoveUp}>
+        </Button>
+        <Button aria-label={"Move task up"} onClick={onClickMoveUp}>
           ↑
-        </button>
-        <button aria-label={"Move task down"} onClick={onClickMoveDown}>
+        </Button>
+        <Button aria-label={"Move task down"} onClick={onClickMoveDown}>
           ↓
-        </button>
+        </Button>
       </div>
     </li>
   )
