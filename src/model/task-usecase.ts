@@ -68,6 +68,11 @@ export const swapOrder = async (
   await repo.swapOrder(leftId, rightId)
 }
 
+export const updateOrders = async (ids: string[]): Promise<void> => {
+  const repo = createTaskRepository()
+  await repo.updateOrders(ids)
+}
+
 export const renameTask = async (id: string, name: string): Promise<void> => {
   const repo = createTaskRepository()
   await repo.update(id, (prev) => ({

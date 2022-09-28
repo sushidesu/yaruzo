@@ -1,11 +1,9 @@
 import type React from "react"
 import { useState, useCallback } from "react"
 
-type Swap<T> = [T, T]
-
-export const useDragAndDrop = <T extends HTMLElement, P>(
+export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
   list: P[],
-  onDropItem: (swaps: Swap<P>[]) => Promise<P[] | undefined>
+  onDropItem: (sorted: P[]) => Promise<P[] | undefined>
 ) => {
   const [dragTarget, setDragTarget] = useState<number | undefined>()
   const [previewList, swap, reset] = useSortableList(list)
@@ -44,15 +42,18 @@ export const useDragAndDrop = <T extends HTMLElement, P>(
   const onDrop = useCallback<(i: number) => React.DragEventHandler<T>>(
     (i) => async () => {
       console.log("drop!")
-      const s = swaps(list, previewList)
-      if (s.length <= 0) return
+      const invalid = list.length !== previewList.length
+      const equal = equals(list, previewList)
+      if (invalid || equal) {
+        console.log("equal or invalid", { updated: invalid, equal })
+      }
       console.log("swap!")
-      const newList = await onDropItem(s)
+      const newList = await onDropItem(previewList)
       if (newList) {
         reset(newList)
       }
     },
-    []
+    [list, previewList, onDropItem]
   )
 
   const props = useCallback(
@@ -107,7 +108,8 @@ const useSortableList = <T>(
   return [list, swap, reset]
 }
 
-const swaps = <T>(prev: T[], next: T[]): Swap<T>[] => {
-  if (prev.length !== next.length) return []
-  return []
+const equals = <T extends { id: string }>(prev: T[], next: T[]): boolean => {
+  const p = prev.reduce((acc, cur) => acc + cur.id, "")
+  const n = next.reduce((acc, cur) => acc + cur.id, "")
+  return p === n
 }

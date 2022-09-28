@@ -10,7 +10,7 @@ import {
   renameTask,
   moveTaskPrev,
   moveTaskNext,
-  swapOrder,
+  updateOrders,
 } from "../../../model/task-usecase"
 import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
@@ -45,11 +45,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const [list, reset] = useDragAndDrop<HTMLLIElement, Task>(
     tasks.filter(filterTasks(today)),
     useCallback(
-      async (swaps) => {
-        for (const [left, right] of swaps) {
-          await swapOrder(left.id, right.id)
-        }
-        return mutate()
+      async (newList) => {
+        await updateOrders(newList.map((t) => t.id))
+        const result = await mutate()
+        return result?.filter(filterTasks(today))
       },
       [mutate]
     )

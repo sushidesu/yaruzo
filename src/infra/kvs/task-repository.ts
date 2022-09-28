@@ -184,5 +184,31 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
       await orders.set(leftId, right)
       await orders.set(rightId, left)
     },
+
+    updateOrders: async (ids) => {
+      const orderStorage = await getOrderStorage()
+
+      const orders = (
+        await Promise.all(
+          ids.map(async (id) => {
+            const r = await orderStorage.get(id)
+            return r ? [r] : []
+          })
+        )
+      ).flat()
+
+      if (orders.length !== ids.length) {
+        throw new Error("some orders not found")
+      }
+
+      const sortedOrders = orders.sort((a, b) => a - b)
+      const targets: [string, number][] = ids.map((id, i) => [
+        id,
+        sortedOrders[i] as number,
+      ]) // 上で要素数を確認しているのでundefinedにならない
+      await Promise.all(
+        targets.map(([key, value]) => orderStorage.set(key, value))
+      )
+    },
   }
 }
