@@ -17,10 +17,17 @@ import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
 import { CompleteButton } from "../../feature/CompleteButton"
 import { Button } from "../../ui/Button"
+import { useDragAndDrop } from "../../ui/useDragAndDrop"
+import type { Dayjs } from "dayjs"
 
 type YarukotoProps = {
   dateKey: DateKey
 }
+
+const filterTasks =
+  (date: Dayjs) =>
+  (task: Task): boolean =>
+    task.todoAt === dayjsToKey(date)
 
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
@@ -35,6 +42,19 @@ export const Yarukoto = (props: YarukotoProps) => {
 
   const [text, setText] = useState("")
 
+  const [list, reset] = useDragAndDrop<HTMLLIElement, Task>(
+    tasks.filter(filterTasks(today)),
+    useCallback(
+      async (swaps) => {
+        for (const [left, right] of swaps) {
+          await swapOrder(left.id, right.id)
+        }
+        return mutate()
+      },
+      [mutate]
+    )
+  )
+
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
       setText(e.target.value)
@@ -46,32 +66,37 @@ export const Yarukoto = (props: YarukotoProps) => {
     async (e) => {
       e.preventDefault()
       await createTaskToday(text)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
       setText("")
     },
-    [text, mutate]
+    [text, mutate, reset]
   )
 
   const handleRemove = useCallback(
     (id: string) => async () => {
       await removeTask(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleToggleComplete = useCallback(
     (id: string) => async () => {
       await toggleCompleteTask(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleRename = useCallback(
     (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
+        const n = await mutate()
+        if (n) reset(n.filter(filterTasks(today)))
       }
     },
     []
@@ -80,45 +105,19 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
       await moveTaskPrev(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
-  )
-
-  const handleClickMoveUp = useCallback(
-    (id: string, index: number, range: Task[]) => async () => {
-      // 1つ前のタスクと場所を交換する をやる
-      const prev = range[index - 1]
-      if (prev === undefined) {
-        // 先頭なので何もしない
-        return
-      }
-      await swapOrder(prev.id, id)
-      await mutate()
-    },
-    [mutate]
-  )
-
-  const handleClickMoveDown = useCallback(
-    (id: string, index: number, range: Task[]) => async () => {
-      // 1つ後のタスクと場所を交換する をやる
-      const next = range[index + 1]
-      if (next === undefined) {
-        // 最後尾なので何もしない
-        return
-      }
-      await swapOrder(id, next.id)
-      await mutate()
-    },
-    [mutate]
+    [mutate, reset]
   )
 
   return (
@@ -166,22 +165,25 @@ export const Yarukoto = (props: YarukotoProps) => {
       <div className={clsx(styles["day"])}>
         <p className={clsx(styles["day-header"], styles["today"])}>{"Today"}</p>
         <ul className={clsx(styles["items"])}>
-          {tasks
-            .filter((t) => t.todoAt === dayjsToKey(today))
-            .map((task, i, range) => (
-              <Item
+          {list?.map(({ item: task, props, dragging }) => {
+            return (
+              <li
                 key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickRemove={handleRemove(task.id)}
-                onClickCheck={handleToggleComplete(task.id)}
-                onClickMoveNext={handleClickMoveNext(task.id)}
-                onClickMovePrev={handleClickMovePrev(task.id)}
-                onClickMoveUp={handleClickMoveUp(task.id, i, range)}
-                onClickMoveDown={handleClickMoveDown(task.id, i, range)}
-                onBlurName={handleRename(task.id)}
-              />
-            ))}
+                style={{ opacity: dragging ? "0.4" : "1" }}
+                {...props}
+              >
+                <Item
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickRemove={handleRemove(task.id)}
+                  onClickCheck={handleToggleComplete(task.id)}
+                  onClickMoveNext={handleClickMoveNext(task.id)}
+                  onClickMovePrev={handleClickMovePrev(task.id)}
+                  onBlurName={handleRename(task.id)}
+                />
+              </li>
+            )
+          })}
         </ul>
       </div>
 
@@ -211,8 +213,6 @@ type ItemProps = {
   onClickCheck: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
-  onClickMoveUp: () => void
-  onClickMoveDown: () => void
   onBlurName: React.FocusEventHandler<HTMLParagraphElement>
 }
 
@@ -224,8 +224,6 @@ const Item = (props: ItemProps): JSX.Element => {
     onClickCheck,
     onClickMoveNext,
     onClickMovePrev,
-    onClickMoveUp,
-    onClickMoveDown,
     onBlurName,
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
@@ -245,6 +243,7 @@ const Item = (props: ItemProps): JSX.Element => {
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
+        <div>DragHere</div>
         <Button onClick={onClickRemove}>REMOVE</Button>
         <Button
           onClick={onClickMovePrev}
@@ -257,12 +256,6 @@ const Item = (props: ItemProps): JSX.Element => {
           aria-label={"Move task to the next day"}
         >
           →
-        </Button>
-        <Button aria-label={"Move task up"} onClick={onClickMoveUp}>
-          ↑
-        </Button>
-        <Button aria-label={"Move task down"} onClick={onClickMoveDown}>
-          ↓
         </Button>
       </div>
     </li>
