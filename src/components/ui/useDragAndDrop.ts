@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useCallback, Ref, RefObject } from "react"
+import { useState, useCallback } from "react"
 
 export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
   list: P[],
@@ -9,28 +9,28 @@ export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
   const [previewList, swap, reset] = useSortableList(list)
 
   const onDragStart = useCallback<(i: number) => React.DragEventHandler<T>>(
-    (i) => (e) => {
+    (i) => () => {
       setDragTarget(i)
     },
     []
   )
 
   const onDragEnd = useCallback<(i: number) => React.DragEventHandler<T>>(
-    (i) => (e) => {
+    () => () => {
       setDragTarget(undefined)
     },
     []
   )
 
   const onDragOver = useCallback<(i: number) => React.DragEventHandler<T>>(
-    (i) => (e) => {
+    () => (e) => {
       e.preventDefault()
     },
     []
   )
 
   const onDragEnter = useCallback<(i: number) => React.DragEventHandler<T>>(
-    (i) => (e) => {
+    (i) => () => {
       if (dragTarget === undefined) return
       if (dragTarget === i) return
       swap(dragTarget, i)
@@ -40,7 +40,7 @@ export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
   )
 
   const onDrop = useCallback<(i: number) => React.DragEventHandler<T>>(
-    (i) => async () => {
+    () => async () => {
       console.log("drop!")
       const invalid = list.length !== previewList.length
       const equal = equals(list, previewList)
