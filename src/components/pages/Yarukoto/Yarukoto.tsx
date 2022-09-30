@@ -19,6 +19,7 @@ import { CompleteButton } from "../../feature/CompleteButton"
 import { Button } from "../../ui/Button"
 import { useDragAndDrop } from "../../ui/useDragAndDrop"
 import type { Dayjs } from "dayjs"
+import dayjs from "dayjs"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -119,6 +120,8 @@ export const Yarukoto = (props: YarukotoProps) => {
     [mutate, reset]
   )
 
+  const isToday = dayjs().isSame(today, "date")
+
   return (
     <div className={clsx(styles["wrapper"])}>
       <div>
@@ -163,7 +166,15 @@ export const Yarukoto = (props: YarukotoProps) => {
       </div>
 
       <div className={clsx(styles["day"])}>
-        <p className={clsx(styles["day-header"], styles["today"])}>{"Today"}</p>
+        <p
+          className={clsx(
+            styles["day-header"],
+            styles["main"],
+            isToday && styles["today"]
+          )}
+        >
+          {isToday ? "Today" : today.format("M/D")}
+        </p>
         <ul className={clsx(styles["items"])}>
           {list?.map(({ item: task, props, dragging }) => {
             return (

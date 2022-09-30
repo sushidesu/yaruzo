@@ -26,6 +26,10 @@
   color: var(--c-text);
 }
 
+.day-header.main {
+  font-weight: bold;
+}
+
 .day-header.today::after {
   display: block;
   width: 6px;
