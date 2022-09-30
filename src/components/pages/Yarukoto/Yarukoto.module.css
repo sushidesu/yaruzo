@@ -40,11 +40,21 @@
   margin: 0;
 }
 
+.items > li {
+  list-style-type: none;
+}
+
+.items > li.dragging {
+  opacity: 0.01;
+}
+
 .item {
   display: flex;
   column-gap: 0.5rem;
   align-items: center;
   padding: 0.2rem 0.4rem;
+  background-color: #fff;
+  border-radius: 4px;
 }
 
 .item-name {

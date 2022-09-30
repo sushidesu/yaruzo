@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, Ref, RefObject } from "react"
 
 export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
   list: P[],
@@ -46,6 +46,7 @@ export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
       const equal = equals(list, previewList)
       if (invalid || equal) {
         console.log("equal or invalid", { updated: invalid, equal })
+        return
       }
       console.log("swap!")
       const newList = await onDropItem(previewList)

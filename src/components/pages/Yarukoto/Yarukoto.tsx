@@ -151,12 +151,13 @@ export const Yarukoto = (props: YarukotoProps) => {
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(prevDay))
             .map((task) => (
-              <ItemNotNow
-                key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickCheck={handleToggleComplete(task.id)}
-              />
+              <li key={task.id}>
+                <ItemNotNow
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickCheck={handleToggleComplete(task.id)}
+                />
+              </li>
             ))}
         </ul>
       </div>
@@ -168,7 +169,7 @@ export const Yarukoto = (props: YarukotoProps) => {
             return (
               <li
                 key={task.id}
-                style={{ opacity: dragging ? "0.4" : "1" }}
+                className={clsx(dragging && styles["dragging"])}
                 {...props}
               >
                 <Item
@@ -192,12 +193,13 @@ export const Yarukoto = (props: YarukotoProps) => {
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(nextDay))
             .map((task) => (
-              <ItemNotNow
-                key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickCheck={handleToggleComplete(task.id)}
-              />
+              <li key={task.id}>
+                <ItemNotNow
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickCheck={handleToggleComplete(task.id)}
+                />
+              </li>
             ))}
         </ul>
       </div>
@@ -227,7 +229,7 @@ const Item = (props: ItemProps): JSX.Element => {
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li className={clsx(styles["item"])}>
+    <div className={clsx(styles["item"])}>
       <CompleteButton complete={done} onClick={onClickCheck} />
       {done ? (
         <p className={clsx(styles["item-name"], styles["completed"])}>{name}</p>
@@ -257,7 +259,7 @@ const Item = (props: ItemProps): JSX.Element => {
           →
         </Button>
       </div>
-    </li>
+    </div>
   )
 }
 
@@ -270,7 +272,7 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
   const { name, completedAt, onClickCheck } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li
+    <div
       className={clsx(
         styles["item"],
         done && styles["completed"],
@@ -279,6 +281,6 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
     >
       <CompleteButton complete={done} onClick={onClickCheck} />
       <p>{name}</p>
-    </li>
+    </div>
   )
 }
