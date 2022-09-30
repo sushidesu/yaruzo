@@ -99,3 +99,13 @@
   background-color: var(--c-text-secondary);
   border-radius: 2px;
 }
+
+.form {
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.6rem;
+}
+
+.form > input {
+  padding: 4px;
+}

@@ -65,6 +65,8 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleSubmit = useCallback<React.FormEventHandler<HTMLFormElement>>(
     async (e) => {
       e.preventDefault()
+      if (text === "") return
+
       await createTaskToday(text)
       const n = await mutate()
       if (n) reset(n.filter(filterTasks(today)))
@@ -140,7 +142,7 @@ export const Yarukoto = (props: YarukotoProps) => {
             Next
           </Link>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form className={styles["form"]} onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
           <Button variant={"primary"} type={"submit"}>
             ADD
