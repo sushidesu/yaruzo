@@ -244,7 +244,6 @@ const Item = (props: ItemProps): JSX.Element => {
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
-        <div>DragHere</div>
         <Button onClick={onClickRemove}>REMOVE</Button>
         <Button
           onClick={onClickMovePrev}
@@ -259,6 +258,7 @@ const Item = (props: ItemProps): JSX.Element => {
           →
         </Button>
       </div>
+      <DragHere />
     </div>
   )
 }
@@ -281,6 +281,16 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
     >
       <CompleteButton complete={done} onClick={onClickCheck} />
       <p>{name}</p>
+    </div>
+  )
+}
+
+const DragHere = (): JSX.Element => {
+  return (
+    <div aria-label={"Drag here"} className={clsx(styles["drag"])}>
+      <div />
+      <div />
+      <div />
     </div>
   )
 }
