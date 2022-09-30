@@ -26,6 +26,10 @@
   color: var(--c-text);
 }
 
+.day-header.main {
+  font-weight: bold;
+}
+
 .day-header.today::after {
   display: block;
   width: 6px;
@@ -40,20 +44,31 @@
   margin: 0;
 }
 
+.items > li {
+  list-style-type: none;
+}
+
+.items > li.dragging {
+  opacity: 0.01;
+}
+
 .item {
   display: flex;
-  column-gap: 0.5rem;
+  column-gap: 0.8rem;
   align-items: center;
   padding: 0.2rem 0.4rem;
+  background-color: #fff;
+  border-radius: 4px;
 }
 
 .item-name {
   flex: 1 1 auto;
+  padding: 4px;
 }
 
 .item-actions {
   display: flex;
-  column-gap: 0.2rem;
+  column-gap: 0.4rem;
 }
 
 .item + .item {
@@ -67,4 +82,30 @@
 
 .not-now {
   color: #a1a1a1;
+}
+
+.drag {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  cursor: move;
+}
+
+.drag > div {
+  width: 100%;
+  height: 2px;
+  background-color: var(--c-text-secondary);
+  border-radius: 2px;
+}
+
+.form {
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.6rem;
+}
+
+.form > input {
+  padding: 4px;
 }

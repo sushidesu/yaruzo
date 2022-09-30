@@ -1,0 +1,22 @@
+.wrapper {
+  padding: 6px 8px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+.default {
+  background-color: var(--c-gray);
+}
+
+.primary {
+  background-color: var(--c-primary);
+}
+
+.secondary {
+  background-color: var(--c-primary);
+}
+
+.danger {
+  background-color: var(--c-primary);
+}

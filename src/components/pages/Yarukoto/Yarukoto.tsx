@@ -10,16 +10,25 @@ import {
   renameTask,
   moveTaskPrev,
   moveTaskNext,
-  swapOrder,
+  updateOrders,
 } from "../../../model/task-usecase"
 import { useTasks } from "../../../model/useTasks"
 import { Link } from "rocon/react"
 import { routes_y } from "../../../app/Router"
 import { CompleteButton } from "../../feature/CompleteButton"
+import { Button } from "../../ui/Button"
+import { useDragAndDrop } from "../../ui/useDragAndDrop"
+import type { Dayjs } from "dayjs"
+import dayjs from "dayjs"
 
 type YarukotoProps = {
   dateKey: DateKey
 }
+
+const filterTasks =
+  (date: Dayjs) =>
+  (task: Task): boolean =>
+    task.todoAt === dayjsToKey(date)
 
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
@@ -34,6 +43,18 @@ export const Yarukoto = (props: YarukotoProps) => {
 
   const [text, setText] = useState("")
 
+  const [list, reset] = useDragAndDrop<HTMLLIElement, Task>(
+    tasks.filter(filterTasks(today)),
+    useCallback(
+      async (newList) => {
+        await updateOrders(newList.map((t) => t.id))
+        const result = await mutate()
+        return result?.filter(filterTasks(today))
+      },
+      [mutate]
+    )
+  )
+
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
       setText(e.target.value)
@@ -44,33 +65,40 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleSubmit = useCallback<React.FormEventHandler<HTMLFormElement>>(
     async (e) => {
       e.preventDefault()
+      if (text === "") return
+
       await createTaskToday(text)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
       setText("")
     },
-    [text, mutate]
+    [text, mutate, reset]
   )
 
   const handleRemove = useCallback(
     (id: string) => async () => {
       await removeTask(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleToggleComplete = useCallback(
     (id: string) => async () => {
       await toggleCompleteTask(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleRename = useCallback(
     (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
+        const n = await mutate()
+        if (n) reset(n.filter(filterTasks(today)))
       }
     },
     []
@@ -79,46 +107,22 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
       await moveTaskPrev(id)
-      await mutate()
+      const n = await mutate()
+      if (n) reset(n.filter(filterTasks(today)))
     },
-    [mutate]
+    [mutate, reset]
   )
 
-  const handleClickMoveUp = useCallback(
-    (id: string, index: number, range: Task[]) => async () => {
-      // 1つ前のタスクと場所を交換する をやる
-      const prev = range[index - 1]
-      if (prev === undefined) {
-        // 先頭なので何もしない
-        return
-      }
-      await swapOrder(prev.id, id)
-      await mutate()
-    },
-    [mutate]
-  )
-
-  const handleClickMoveDown = useCallback(
-    (id: string, index: number, range: Task[]) => async () => {
-      // 1つ後のタスクと場所を交換する をやる
-      const next = range[index + 1]
-      if (next === undefined) {
-        // 最後尾なので何もしない
-        return
-      }
-      await swapOrder(id, next.id)
-      await mutate()
-    },
-    [mutate]
-  )
+  const isToday = dayjs().isSame(today, "date")
 
   return (
     <div className={clsx(styles["wrapper"])}>
@@ -138,9 +142,11 @@ export const Yarukoto = (props: YarukotoProps) => {
             Next
           </Link>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form className={styles["form"]} onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
-          <button type={"submit"}>ADD</button>
+          <Button variant={"primary"} type={"submit"}>
+            ADD
+          </Button>
         </form>
       </div>
 
@@ -150,35 +156,47 @@ export const Yarukoto = (props: YarukotoProps) => {
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(prevDay))
             .map((task) => (
-              <ItemNotNow
-                key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickCheck={handleToggleComplete(task.id)}
-              />
+              <li key={task.id}>
+                <ItemNotNow
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickCheck={handleToggleComplete(task.id)}
+                />
+              </li>
             ))}
         </ul>
       </div>
 
       <div className={clsx(styles["day"])}>
-        <p className={clsx(styles["day-header"], styles["today"])}>{"Today"}</p>
+        <p
+          className={clsx(
+            styles["day-header"],
+            styles["main"],
+            isToday && styles["today"]
+          )}
+        >
+          {isToday ? "Today" : today.format("M/D")}
+        </p>
         <ul className={clsx(styles["items"])}>
-          {tasks
-            .filter((t) => t.todoAt === dayjsToKey(today))
-            .map((task, i, range) => (
-              <Item
+          {list?.map(({ item: task, props, dragging }) => {
+            return (
+              <li
                 key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickRemove={handleRemove(task.id)}
-                onClickCheck={handleToggleComplete(task.id)}
-                onClickMoveNext={handleClickMoveNext(task.id)}
-                onClickMovePrev={handleClickMovePrev(task.id)}
-                onClickMoveUp={handleClickMoveUp(task.id, i, range)}
-                onClickMoveDown={handleClickMoveDown(task.id, i, range)}
-                onBlurName={handleRename(task.id)}
-              />
-            ))}
+                className={clsx(dragging && styles["dragging"])}
+                {...props}
+              >
+                <Item
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickRemove={handleRemove(task.id)}
+                  onClickCheck={handleToggleComplete(task.id)}
+                  onClickMoveNext={handleClickMoveNext(task.id)}
+                  onClickMovePrev={handleClickMovePrev(task.id)}
+                  onBlurName={handleRename(task.id)}
+                />
+              </li>
+            )
+          })}
         </ul>
       </div>
 
@@ -188,12 +206,13 @@ export const Yarukoto = (props: YarukotoProps) => {
           {tasks
             .filter((t) => t.todoAt === dayjsToKey(nextDay))
             .map((task) => (
-              <ItemNotNow
-                key={task.id}
-                name={task.name}
-                completedAt={task.completedAt}
-                onClickCheck={handleToggleComplete(task.id)}
-              />
+              <li key={task.id}>
+                <ItemNotNow
+                  name={task.name}
+                  completedAt={task.completedAt}
+                  onClickCheck={handleToggleComplete(task.id)}
+                />
+              </li>
             ))}
         </ul>
       </div>
@@ -208,8 +227,6 @@ type ItemProps = {
   onClickCheck: () => void
   onClickMoveNext: () => void
   onClickMovePrev: () => void
-  onClickMoveUp: () => void
-  onClickMoveDown: () => void
   onBlurName: React.FocusEventHandler<HTMLParagraphElement>
 }
 
@@ -221,13 +238,11 @@ const Item = (props: ItemProps): JSX.Element => {
     onClickCheck,
     onClickMoveNext,
     onClickMovePrev,
-    onClickMoveUp,
-    onClickMoveDown,
     onBlurName,
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li className={clsx(styles["item"])}>
+    <div className={clsx(styles["item"])}>
       <CompleteButton complete={done} onClick={onClickCheck} />
       {done ? (
         <p className={clsx(styles["item-name"], styles["completed"])}>{name}</p>
@@ -242,27 +257,22 @@ const Item = (props: ItemProps): JSX.Element => {
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
-        <button onClick={onClickRemove}>REMOVE</button>
-        <button
+        <Button onClick={onClickRemove}>REMOVE</Button>
+        <Button
           onClick={onClickMovePrev}
           aria-label={"Move task to the previous day"}
         >
           ←
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onClickMoveNext}
           aria-label={"Move task to the next day"}
         >
           →
-        </button>
-        <button aria-label={"Move task up"} onClick={onClickMoveUp}>
-          ↑
-        </button>
-        <button aria-label={"Move task down"} onClick={onClickMoveDown}>
-          ↓
-        </button>
+        </Button>
       </div>
-    </li>
+      <DragHere />
+    </div>
   )
 }
 
@@ -275,7 +285,7 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
   const { name, completedAt, onClickCheck } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
-    <li
+    <div
       className={clsx(
         styles["item"],
         done && styles["completed"],
@@ -284,6 +294,16 @@ const ItemNotNow = (props: ItemNotNowProps): JSX.Element => {
     >
       <CompleteButton complete={done} onClick={onClickCheck} />
       <p>{name}</p>
-    </li>
+    </div>
+  )
+}
+
+const DragHere = (): JSX.Element => {
+  return (
+    <div aria-label={"Drag here"} className={clsx(styles["drag"])}>
+      <div />
+      <div />
+      <div />
+    </div>
   )
 }
