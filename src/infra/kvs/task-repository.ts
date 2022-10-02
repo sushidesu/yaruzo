@@ -131,7 +131,6 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
     },
 
     query: async ({ gte, lt }) => {
-      console.log("query", { gte, lt })
       const tasks = await getAll()
       return tasks.filter((t) => {
         const start = keyToDayjs(gte)
