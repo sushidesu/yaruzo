@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useEffect } from "react"
 import { clsx } from "clsx"
 import { Task, DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 
@@ -18,17 +18,11 @@ import { routes_y } from "../../../app/Router"
 import { CompleteButton } from "../../feature/CompleteButton"
 import { Button } from "../../ui/Button"
 import { useDragAndDrop } from "../../ui/useDragAndDrop"
-import type { Dayjs } from "dayjs"
 import dayjs from "dayjs"
 
 type YarukotoProps = {
   dateKey: DateKey
 }
-
-const filterTasks =
-  (date: Dayjs) =>
-  (task: Task): boolean =>
-    task.todoAt === dayjsToKey(date)
 
 export const Yarukoto = (props: YarukotoProps) => {
   const { dateKey } = props
@@ -36,24 +30,39 @@ export const Yarukoto = (props: YarukotoProps) => {
   const prevDay = today.subtract(1, "day")
   const nextDay = today.add(1, "day")
   // 前後1日も含めて取得する
-  const [tasks, mutate] = useTasks({
+  const [prevDayTasks] = useTasks({
     gte: dayjsToKey(prevDay),
+    lt: dayjsToKey(today),
+  })
+  const todayKey = {
+    gte: dayjsToKey(today),
+    lt: dayjsToKey(nextDay),
+  }
+  const [todayTasks, mutate] = useTasks(todayKey)
+  const [nextDayTasks] = useTasks({
+    gte: dayjsToKey(nextDay),
     lt: dayjsToKey(nextDay.add(1, "day")),
   })
 
   const [text, setText] = useState("")
 
   const [list, reset] = useDragAndDrop<HTMLLIElement, Task>(
-    tasks.filter(filterTasks(today)),
+    todayTasks,
     useCallback(
       async (newList) => {
         await updateOrders(newList.map((t) => t.id))
         const result = await mutate()
-        return result?.filter(filterTasks(today))
+        return result
       },
       [mutate]
     )
   )
+
+  useEffect(() => {
+    // 表示する日付が変わったらpreviewリストをresetする (ページ遷移時)
+    // 本当にこれでいいのかわからないけど想定通りの動作はする
+    reset(todayTasks)
+  }, [todayKey.gte, todayKey.lt])
 
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
@@ -69,7 +78,7 @@ export const Yarukoto = (props: YarukotoProps) => {
 
       await createTaskToday(text)
       const n = await mutate()
-      if (n) reset(n.filter(filterTasks(today)))
+      if (n) reset(n)
       setText("")
     },
     [text, mutate, reset]
@@ -79,7 +88,7 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async () => {
       await removeTask(id)
       const n = await mutate()
-      if (n) reset(n.filter(filterTasks(today)))
+      if (n) reset(n)
     },
     [mutate, reset]
   )
@@ -88,7 +97,7 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async () => {
       await toggleCompleteTask(id)
       const n = await mutate()
-      if (n) reset(n.filter(filterTasks(today)))
+      if (n) reset(n)
     },
     [mutate, reset]
   )
@@ -98,17 +107,17 @@ export const Yarukoto = (props: YarukotoProps) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
         const n = await mutate()
-        if (n) reset(n.filter(filterTasks(today)))
+        if (n) reset(n)
       }
     },
-    []
+    [mutate, reset]
   )
 
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
       const n = await mutate()
-      if (n) reset(n.filter(filterTasks(today)))
+      if (n) reset(n)
     },
     [mutate, reset]
   )
@@ -117,7 +126,7 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async () => {
       await moveTaskPrev(id)
       const n = await mutate()
-      if (n) reset(n.filter(filterTasks(today)))
+      if (n) reset(n)
     },
     [mutate, reset]
   )
@@ -153,17 +162,15 @@ export const Yarukoto = (props: YarukotoProps) => {
       <div className={clsx(styles["day"])}>
         <p className={clsx(styles["day-header"])}>{prevDay.format("M/D")}</p>
         <ul className={clsx(styles["items"])}>
-          {tasks
-            .filter((t) => t.todoAt === dayjsToKey(prevDay))
-            .map((task) => (
-              <li key={task.id}>
-                <ItemNotNow
-                  name={task.name}
-                  completedAt={task.completedAt}
-                  onClickCheck={handleToggleComplete(task.id)}
-                />
-              </li>
-            ))}
+          {prevDayTasks.map((task) => (
+            <li key={task.id}>
+              <ItemNotNow
+                name={task.name}
+                completedAt={task.completedAt}
+                onClickCheck={handleToggleComplete(task.id)}
+              />
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -203,17 +210,15 @@ export const Yarukoto = (props: YarukotoProps) => {
       <div className={clsx(styles["day"])}>
         <p className={clsx(styles["day-header"])}>{nextDay.format("M/D")}</p>
         <ul className={clsx(styles["items"])}>
-          {tasks
-            .filter((t) => t.todoAt === dayjsToKey(nextDay))
-            .map((task) => (
-              <li key={task.id}>
-                <ItemNotNow
-                  name={task.name}
-                  completedAt={task.completedAt}
-                  onClickCheck={handleToggleComplete(task.id)}
-                />
-              </li>
-            ))}
+          {nextDayTasks.map((task) => (
+            <li key={task.id}>
+              <ItemNotNow
+                name={task.name}
+                completedAt={task.completedAt}
+                onClickCheck={handleToggleComplete(task.id)}
+              />
+            </li>
+          ))}
         </ul>
       </div>
     </div>
