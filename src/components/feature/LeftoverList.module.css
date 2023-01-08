@@ -1,0 +1,38 @@
+.wrapper {
+  padding-right: 1rem;
+  margin-top: 2rem;
+}
+
+.content {
+  margin-top: 1.4rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 300px;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name-with-date {
+  display: flex;
+  flex-direction: column;
+}
+
+.name-with-date > span + span {
+  font-size: 0.8rem;
+  color: var(--c-text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}

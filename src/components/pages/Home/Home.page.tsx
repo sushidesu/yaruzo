@@ -1,15 +1,20 @@
 import { Home } from "./Home"
-import { Layout } from "../../ui/Layout"
+import { LayoutWithSidebar } from "../../ui/LayoutWithSidebar"
 import { Header } from "../../ui/Header"
 import { Footer } from "../../ui/Footer"
 import { Suspense } from "react"
+import { LeftoverList } from "../../feature/LeftoverList"
 
 export const HomePage = () => {
   return (
-    <Layout header={<Header />} footer={<Footer />}>
+    <LayoutWithSidebar
+      header={<Header />}
+      footer={<Footer />}
+      sidebar={<LeftoverList />}
+    >
       <Suspense fallback={<div>loading...</div>}>
         <Home />
       </Suspense>
-    </Layout>
+    </LayoutWithSidebar>
   )
 }

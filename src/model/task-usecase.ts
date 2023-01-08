@@ -60,6 +60,10 @@ export const moveTaskPrev = async (id: string): Promise<void> => {
   })
 }
 
+export const moveTaskToday = async (id: string): Promise<void> => {
+  await moveTask(id, today())
+}
+
 export const swapOrder = async (
   leftId: string,
   rightId: string
