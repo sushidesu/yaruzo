@@ -35,7 +35,7 @@ export const LeftoverList = () => {
 
   return (
     <div className={clsx(styles["wrapper"])}>
-      <h2>Leftovers</h2>
+      <h2>Yattenai</h2>
       <div className={clsx(styles["content"])}>
         {leftovers.length <= 0 && <p>No items</p>}
         <ul className={clsx(styles["list"])}>
