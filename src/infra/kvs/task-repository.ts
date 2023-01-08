@@ -112,15 +112,21 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
       tasks.push(from(value))
     }
 
-    return tasks.sort((a, b) => {
-      const aOrder = orders[a.id]
-      const bOrder = orders[b.id]
-      if (aOrder === undefined || bOrder === undefined) {
-        return a.createdAt - b.createdAt
-      } else {
-        return aOrder - bOrder
-      }
-    })
+    return tasks
+      .sort((a, b) => {
+        const aOrder = orders[a.id]
+        const bOrder = orders[b.id]
+        if (aOrder === undefined || bOrder === undefined) {
+          return a.createdAt - b.createdAt
+        } else {
+          return aOrder - bOrder
+        }
+      })
+      .sort((a, b) => {
+        const aTodoAt = keyToDayjs(a.todoAt).unix()
+        const bTodoAt = keyToDayjs(b.todoAt).unix()
+        return bTodoAt - aTodoAt
+      })
   }
 
   return {
