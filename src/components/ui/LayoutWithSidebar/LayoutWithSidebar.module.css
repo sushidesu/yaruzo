@@ -1,0 +1,22 @@
+.wrapper {
+  display: grid;
+  grid-template-rows: max-content 1fr max-content;
+  grid-template-columns: max-content 1fr;
+  min-height: 100vh;
+}
+
+.wrapper > header {
+  grid-column: 1 / -1;
+}
+
+.wrapper > nav {
+  grid-column: 1;
+}
+
+.wrapper > main {
+  grid-column: 2;
+}
+
+.wrapper > footer {
+  grid-column: 1 / -1;
+}
