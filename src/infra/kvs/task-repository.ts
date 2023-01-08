@@ -143,6 +143,11 @@ export const createTaskRepository = (): TaskRepositoryInterface => {
       })
     },
 
+    queryByCompletedAt: async ({ completedAt }) => {
+      const tasks = await getAll()
+      return tasks.filter((t) => t.completedAt === completedAt)
+    },
+
     create: async (task) => {
       const storage = await tasksStorage()
       const orders = await getOrderStorage()
