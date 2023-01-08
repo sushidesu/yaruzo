@@ -13,8 +13,8 @@ export const LayoutWithSidebar = (props: LayoutWithSidebarProps) => {
   return (
     <div className={clsx(styles["wrapper"])}>
       <header>{header}</header>
-      <nav>{sidebar}</nav>
       <main>{children}</main>
+      <nav>{sidebar}</nav>
       <footer>{footer}</footer>
     </div>
   )
