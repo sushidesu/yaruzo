@@ -1,21 +1,13 @@
 import { useCallback, useMemo } from "react"
 import { clsx } from "clsx"
-import useSWR from "swr/immutable"
-import { keyToDayjs, Task } from "../../model/task"
+import { keyToDayjs } from "../../model/task"
 import styles from "./LeftoverList.module.css"
-import { createTaskRepository } from "../../infra/kvs/task-repository"
-import { leftoversKey } from "../../lib/keys/leftoversKey"
 import { Button } from "../ui/Button"
 import { moveTaskToday, removeTask } from "../../model/task-usecase"
+import { useLeftoverTaskList } from "../../model/leftover-task-list-selector"
 
 export const LeftoverList = () => {
-  const repo = useMemo(() => createTaskRepository(), [])
-  const { data } = useSWR(
-    leftoversKey({ completedAt: undefined }),
-    ({ completedAt }) => repo.queryByCompletedAt({ completedAt }),
-    { suspense: true }
-  )
-  const leftovers = data as Task[]
+  const leftovers = useLeftoverTaskList()
 
   const today = useMemo(() => new Date(), [])
 
