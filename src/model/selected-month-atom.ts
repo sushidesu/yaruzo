@@ -18,11 +18,13 @@ export const useChangeSelectedMonth = (): {
   const setter = useSetRecoilState(selectedMonthAtom)
 
   const prev = useCallback(() => {
-    setter((prev) => createTimeStamp(dayjs(prev).add(-1, "month").unix()))
+    setter((prev) => {
+      return createTimeStamp(dayjs(prev).add(-1, "month").valueOf())
+    })
   }, [setter])
 
   const next = useCallback(() => {
-    setter((prev) => createTimeStamp(dayjs(prev).add(1, "month").unix()))
+    setter((prev) => createTimeStamp(dayjs(prev).add(1, "month").valueOf()))
   }, [setter])
 
   return useMemo(

@@ -9,12 +9,13 @@ import {
   useChangeSelectedMonth,
   useSelectedMonth,
 } from "../../../model/selected-month-atom"
+import { Button } from "../../ui/Button"
 
 export const Home = () => {
   const today = dayjs()
 
   const selected = dayjs(useSelectedMonth())
-  const _ = useChangeSelectedMonth()
+  const { prev, next } = useChangeSelectedMonth()
 
   const tasks = useTaskListByMonth()
 
@@ -26,10 +27,12 @@ export const Home = () => {
 
   return (
     <div className={clsx(styles["wrapper"])}>
-      <div>
+      <div className={clsx(styles["selected-month"])}>
+        <Button onClick={prev}>Prev</Button>
         <h2 className={clsx(styles["heading"])}>
           {selected.format("MMMM YYYY")}
         </h2>
+        <Button onClick={next}>Next</Button>
       </div>
       <div className={clsx(styles["boxes"])}>
         {month.map((day) => {
