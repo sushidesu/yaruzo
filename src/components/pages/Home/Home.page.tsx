@@ -10,7 +10,11 @@ export const HomePage = () => {
     <LayoutWithSidebar
       header={<Header />}
       footer={<Footer />}
-      sidebar={<LeftoverList />}
+      sidebar={
+        <Suspense fallback={<div>loading...</div>}>
+          <LeftoverList />
+        </Suspense>
+      }
     >
       <Suspense fallback={<div>loading...</div>}>
         <Home />
