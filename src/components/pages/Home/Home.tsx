@@ -4,11 +4,11 @@ import { routes_y } from "../../../app/Router"
 import { dayjsToKey } from "../../../model/task"
 import dayjs from "dayjs"
 import styles from "./Home.module.css"
-import { useTaskListByMonth } from "../../../model/task-list-by-month-selector"
 import {
   useChangeSelectedMonth,
   useSelectedMonth,
 } from "../../../model/selected-month-atom"
+import { useTaskListByMonth } from "../../../model/task-list-by-month-query"
 import { Button } from "../../ui/Button"
 
 export const Home = () => {

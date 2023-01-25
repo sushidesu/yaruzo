@@ -13,6 +13,9 @@ export type Timestamp = number & {
   __brand: "timestamp"
 }
 export const createTimeStamp = (value: number): Timestamp => value as Timestamp
+export const timestampToDayjs = (t: Timestamp): Dayjs => dayjs(t)
+export const dayjsToTimestamp = (d: Dayjs): Timestamp =>
+  d.valueOf() as Timestamp
 export const now = () => createTimeStamp(Date.now())
 
 export type DateKey = string & {
