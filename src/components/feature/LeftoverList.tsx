@@ -4,7 +4,7 @@ import { keyToDayjs } from "../../model/task"
 import styles from "./LeftoverList.module.css"
 import { Button } from "../ui/Button"
 import { moveTaskToday, removeTask } from "../../model/task-usecase"
-import { useLeftoverTaskList } from "../../model/leftover-task-list-selector"
+import { useLeftoverTaskList } from "../../model/leftover-task-list-query"
 
 export const LeftoverList = () => {
   const leftovers = useLeftoverTaskList()
