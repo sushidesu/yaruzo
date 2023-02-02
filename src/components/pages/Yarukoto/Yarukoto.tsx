@@ -36,6 +36,7 @@ export const Yarukoto = (props: YarukotoProps) => {
   const today = keyToDayjs(dateKey)
   const prevDay = today.subtract(1, "day")
   const nextDay = today.add(1, "day")
+  console.log("hello")
   // 前後1日も含めて取得する
   const [prevDayTasks] = useTasks({
     gte: dayjsToKey(prevDay),
