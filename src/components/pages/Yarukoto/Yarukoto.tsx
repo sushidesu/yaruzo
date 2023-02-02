@@ -1,6 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react"
 import { clsx } from "clsx"
-import { Task, DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
+import {
+  Task,
+  DateKey,
+  dayjsToKey,
+  keyToDayjs,
+  dayjsToTimestamp,
+} from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
@@ -19,6 +25,7 @@ import { CompleteButton } from "../../feature/CompleteButton"
 import { Button } from "../../ui/Button"
 import { useDragAndDrop } from "../../ui/useDragAndDrop"
 import dayjs from "dayjs"
+import { useTaskListByDate } from "../../../model/task-list-by-date"
 
 type YarukotoProps = {
   dateKey: DateKey
@@ -38,7 +45,12 @@ export const Yarukoto = (props: YarukotoProps) => {
     gte: dayjsToKey(today),
     lt: dayjsToKey(nextDay),
   }
+  const todayTasks2 = useTaskListByDate(dayjsToTimestamp(today))
   const [todayTasks, mutate] = useTasks(todayKey)
+  console.log({
+    todayTasks,
+    todayTasks2,
+  })
   const [nextDayTasks] = useTasks({
     gte: dayjsToKey(nextDay),
     lt: dayjsToKey(nextDay.add(1, "day")),
