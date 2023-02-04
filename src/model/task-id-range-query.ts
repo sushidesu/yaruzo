@@ -1,11 +1,10 @@
-import dayjs from "dayjs"
 import { selectorFamily } from "recoil"
 import { createTaskRepository } from "../infra/kvs/task-repository"
-import { dayjsToKey, Timestamp } from "./task"
+import type { DateKey } from "./task"
 
 export const taskIdRangeQuery = selectorFamily<
   string[],
-  { gte: Timestamp; lt: Timestamp }
+  { gte: DateKey; lt: DateKey }
 >({
   key: "taskList",
   get:
@@ -14,8 +13,8 @@ export const taskIdRangeQuery = selectorFamily<
       const taskRepository = createTaskRepository()
 
       const tasks = await taskRepository.query({
-        gte: dayjsToKey(dayjs(gte)),
-        lt: dayjsToKey(dayjs(lt)),
+        gte,
+        lt,
       })
 
       return tasks.map(({ id }) => id)

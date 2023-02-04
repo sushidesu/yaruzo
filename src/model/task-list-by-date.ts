@@ -1,25 +1,19 @@
-import dayjs from "dayjs"
 import { selectorFamily, useRecoilValue, waitForAll } from "recoil"
-import { dayjsToTimestamp, Task, Timestamp } from "./task"
+import { DateKey, dayjsToKey, keyToDayjs, Task } from "./task"
 import { taskIdRangeQuery } from "./task-id-range-query"
 import { taskQuery } from "./task-query"
 
-const taskListByDateQuery = selectorFamily<Task[], Timestamp>({
+const taskListByDateQuery = selectorFamily<Task[], DateKey>({
   key: "taskListByDateQuery",
   get:
-    (now) =>
+    (date) =>
     async ({ get }) => {
-      const d = dayjs(now)
-
-      console.log({
-        start: d.startOf("date").format("YYYY-MM-DD HH:MM"),
-        end: d.endOf("date").format("YYYY-MM-DD HH:MM"),
-      })
+      const d = keyToDayjs(date)
 
       const ids = get(
         taskIdRangeQuery({
-          gte: dayjsToTimestamp(d.startOf("milliseconds")),
-          lt: dayjsToTimestamp(d.endOf("date")),
+          gte: dayjsToKey(d.startOf("date")),
+          lt: dayjsToKey(d.add(1, "day").startOf("date")),
         })
       )
 
@@ -28,6 +22,6 @@ const taskListByDateQuery = selectorFamily<Task[], Timestamp>({
     },
 })
 
-export const useTaskListByDate = (date: Timestamp): Task[] => {
+export const useTaskListByDate = (date: DateKey): Task[] => {
   return useRecoilValue(taskListByDateQuery(date))
 }

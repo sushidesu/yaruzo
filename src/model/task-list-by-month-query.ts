@@ -1,5 +1,5 @@
 import { selector, useRecoilValue, waitForAll } from "recoil"
-import { Task, dayjsToTimestamp } from "./task"
+import { Task, dayjsToKey } from "./task"
 import { selectedMonthAtom } from "./selected-month-atom"
 import { taskQuery } from "./task-query"
 import { taskIdRangeQuery } from "./task-id-range-query"
@@ -12,12 +12,12 @@ export const taskListByMonthQuery = selector<Task[]>({
     const selectedMonth = get(selectedMonthAtom)
     const selected = dayjs(selectedMonth)
     const start = selected.startOf("month")
-    const end = selected.endOf("month")
+    const end = selected.add(1, "month").startOf("month")
 
     const ids = get(
       taskIdRangeQuery({
-        gte: dayjsToTimestamp(start),
-        lt: dayjsToTimestamp(end),
+        gte: dayjsToKey(start),
+        lt: dayjsToKey(end),
       })
     )
     const tasks = get(waitForAll(ids.map((id) => taskQuery(id))))

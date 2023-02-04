@@ -1,12 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react"
 import { clsx } from "clsx"
-import {
-  Task,
-  DateKey,
-  dayjsToKey,
-  keyToDayjs,
-  dayjsToTimestamp,
-} from "../../../model/task"
+import { Task, DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 
 import styles from "./Yarukoto.module.css"
 import {
@@ -36,7 +30,6 @@ export const Yarukoto = (props: YarukotoProps) => {
   const today = keyToDayjs(dateKey)
   const prevDay = today.subtract(1, "day")
   const nextDay = today.add(1, "day")
-  console.log("hello")
   // 前後1日も含めて取得する
   const [prevDayTasks] = useTasks({
     gte: dayjsToKey(prevDay),
@@ -46,7 +39,7 @@ export const Yarukoto = (props: YarukotoProps) => {
     gte: dayjsToKey(today),
     lt: dayjsToKey(nextDay),
   }
-  const todayTasks2 = useTaskListByDate(dayjsToTimestamp(today))
+  const todayTasks2 = useTaskListByDate(dayjsToKey(today))
   const [todayTasks, mutate] = useTasks(todayKey)
   console.log({
     todayTasks,
