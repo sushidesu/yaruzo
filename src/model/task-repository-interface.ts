@@ -1,4 +1,4 @@
-import type { Task, DateKey } from "./task"
+import type { DateKey, Task } from "./task"
 
 export interface TaskRepositoryInterface {
   get(id: string): Promise<Task | undefined>

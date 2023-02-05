@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react"
 import { clsx } from "clsx"
+import { useCallback, useMemo } from "react"
+
+import { useLeftoverTaskList } from "../../model/leftover-task-list-query"
 import { keyToDayjs } from "../../model/task"
-import styles from "./LeftoverList.module.css"
-import { Button } from "../ui/Button"
 import { moveTaskToday, removeTask } from "../../model/task-usecase"
-import { useLeftoverTaskList } from "../../model/leftover-task-list-selector"
+import { Button } from "../ui/Button"
+import styles from "./LeftoverList.module.css"
 
 export const LeftoverList = () => {
   const leftovers = useLeftoverTaskList()

@@ -1,6 +1,7 @@
 import useSWR, { KeyedMutator } from "swr"
-import type { DateKey, Task } from "./task"
+
 import { createTaskRepository } from "../infra/kvs/task-repository"
+import type { DateKey, Task } from "./task"
 
 type TasksQuery = {
   gte: DateKey

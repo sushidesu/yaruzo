@@ -1,15 +1,17 @@
 import { clsx } from "clsx"
-import { Link } from "rocon/react"
-import { routes_y } from "../../../app/Router"
-import { dayjsToKey } from "../../../model/task"
 import dayjs from "dayjs"
-import styles from "./Home.module.css"
-import { useTaskListByMonth } from "../../../model/task-list-by-month-selector"
+import { Link } from "rocon/react"
+
+import { routes_y } from "../../../app/Router"
 import {
   useChangeSelectedMonth,
   useSelectedMonth,
 } from "../../../model/selected-month-atom"
+import { dayjsToKey } from "../../../model/task"
+import { useTaskListByMonth } from "../../../model/task-list-by-month-query"
+import { range } from "../../../utils/range"
 import { Button } from "../../ui/Button"
+import styles from "./Home.module.css"
 
 export const Home = () => {
   const today = dayjs()
@@ -63,10 +65,4 @@ export const Home = () => {
       </div>
     </div>
   )
-}
-
-function* range(start: number, end: number): Generator<number, void, unknown> {
-  for (let i = start; i < end; i++) {
-    yield i
-  }
 }
