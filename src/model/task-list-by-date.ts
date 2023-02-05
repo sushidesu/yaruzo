@@ -8,8 +8,9 @@ import {
 import type { DateKey, Task } from "./task"
 import { taskIdRangeQuery } from "./task-id-range-query"
 import { taskQuery } from "./task-query"
+import { taskSortableList } from "./task-sortable-list"
 
-const taskListByDateQuery = selectorFamily<Task[], DateKey>({
+export const taskListByDateQuery = selectorFamily<Task[], DateKey>({
   key: "taskListByDateQuery",
   get:
     (date) =>
@@ -25,7 +26,9 @@ export const useTaskListByDate = (date: DateKey): Task[] => {
 }
 
 export const useRefreshTaskListByDate = () => {
-  return useRecoilCallback(({ refresh }) => (date: DateKey) => {
+  return useRecoilCallback(({ refresh, reset }) => (date: DateKey) => {
+    console.log(`refresh: ${date}`)
     refresh(taskIdRangeQuery(date))
+    reset(taskSortableList(date))
   })
 }

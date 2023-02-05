@@ -1,15 +1,17 @@
 import { clsx } from "clsx"
 import dayjs from "dayjs"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useState } from "react"
 import { Link } from "rocon/react"
 
 import { routes_y } from "../../../app/Router"
-import { DateKey, dayjsToKey, keyToDayjs, Task } from "../../../model/task"
+import { useRefreshLeftoverTaskList } from "../../../model/leftover-task-list-query"
+import { DateKey, dayjsToKey, keyToDayjs } from "../../../model/task"
 import {
   useRefreshTaskListByDate,
   useTaskListByDate,
 } from "../../../model/task-list-by-date"
 import { useRefreshTaskQuery } from "../../../model/task-query"
+import { useSortableList } from "../../../model/task-sortable-list"
 import {
   createTaskToday,
   moveTaskNext,
@@ -21,7 +23,6 @@ import {
 } from "../../../model/task-usecase"
 import { CompleteButton } from "../../feature/CompleteButton"
 import { Button } from "../../ui/Button"
-import { useDragAndDrop } from "../../ui/useDragAndDrop"
 import styles from "./Yarukoto.module.css"
 
 type YarukotoProps = {
@@ -35,32 +36,15 @@ export const Yarukoto = (props: YarukotoProps) => {
   const nextDay = today.add(1, "day")
   // 前後1日も含めて取得する
   const prevDayTasks = useTaskListByDate(dayjsToKey(prevDay))
-  const todayKey = {
-    gte: dayjsToKey(today),
-    lt: dayjsToKey(nextDay),
-  }
-  const todayTasks = useTaskListByDate(dayjsToKey(today))
+  const todayTasks = useSortableList(dayjsToKey(today), async (newList) => {
+    await updateOrders(newList.map((t) => t.id))
+  })
+  const nextDayTasks = useTaskListByDate(dayjsToKey(nextDay))
   const refreshTasks = useRefreshTaskListByDate()
   const refreshTask = useRefreshTaskQuery()
-  const nextDayTasks = useTaskListByDate(dayjsToKey(nextDay))
+  const refreshLeftovers = useRefreshLeftoverTaskList()
 
   const [text, setText] = useState("")
-
-  const [_list, _reset] = useDragAndDrop<HTMLLIElement, Task>(
-    todayTasks,
-    useCallback(async (newList) => {
-      await updateOrders(newList.map((t) => t.id))
-      // const result = await mutate()
-      // return result
-      return newList
-    }, [])
-  )
-
-  useEffect(() => {
-    // 表示する日付が変わったらpreviewリストをresetする (ページ遷移時)
-    // 本当にこれでいいのかわからないけど想定通りの動作はする
-    // reset(todayTasks)
-  }, [todayKey.gte, todayKey.lt])
 
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => {
@@ -76,8 +60,6 @@ export const Yarukoto = (props: YarukotoProps) => {
 
       await createTaskToday(text)
       refreshTasks(dayjsToKey(today))
-      // const n = await mutate()
-      // if (n) reset(n)
       setText("")
     },
     [text, today, refreshTasks]
@@ -86,8 +68,6 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleRemove = useCallback(
     (id: string) => async () => {
       await removeTask(id)
-      // const n = await mutate()
-      // if (n) reset(n)
       refreshTasks(dayjsToKey(today))
     },
     [refreshTasks, today]
@@ -96,9 +76,8 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleToggleComplete = useCallback(
     (id: string) => async () => {
       await toggleCompleteTask(id)
-      // const n = await mutate()
-      // if (n) reset(n)
       refreshTask(id)
+      refreshLeftovers()
     },
     [refreshTask]
   )
@@ -107,8 +86,6 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
-        // const n = await mutate()
-        // if (n) reset(n)
         refreshTask(id)
       }
     },
@@ -118,8 +95,6 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
-      // const n = await mutate()
-      // if (n) reset(n)
       refreshTasks(dayjsToKey(today))
       refreshTasks(dayjsToKey(nextDay))
       refreshTask(id)
@@ -130,8 +105,6 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
       await moveTaskPrev(id)
-      // const n = await mutate()
-      // if (n) reset(n)
       refreshTasks(dayjsToKey(prevDay))
       refreshTasks(dayjsToKey(today))
       refreshTask(id)
@@ -193,13 +166,12 @@ export const Yarukoto = (props: YarukotoProps) => {
           {isToday ? "Today" : today.format("M/D")}
         </p>
         <ul className={clsx(styles["items"])}>
-          {todayTasks.map((task) => {
-            const dragging = false
+          {todayTasks.map(({ item: task, props, dragging }) => {
             return (
               <li
                 key={task.id}
                 className={clsx(dragging && styles["dragging"])}
-                // {...props}
+                {...props}
               >
                 <Item
                   name={task.name}
