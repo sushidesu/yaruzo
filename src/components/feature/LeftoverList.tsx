@@ -1,27 +1,43 @@
 import { clsx } from "clsx"
+import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 
-import { useLeftoverTaskList } from "../../model/leftover-task-list-query"
-import { keyToDayjs } from "../../model/task"
+import {
+  useLeftoverTaskList,
+  useRefreshLeftoverTaskList,
+} from "../../model/leftover-task-list-query"
+import { dayjsToKey, keyToDayjs, Task } from "../../model/task"
+import { useRefreshTaskListByDate } from "../../model/task-list-by-date"
+import { useRefreshTaskQuery } from "../../model/task-query"
 import { moveTaskToday, removeTask } from "../../model/task-usecase"
 import { Button } from "../ui/Button"
 import styles from "./LeftoverList.module.css"
 
 export const LeftoverList = () => {
   const leftovers = useLeftoverTaskList()
+  const refreshLeftovers = useRefreshLeftoverTaskList()
+  const refreshTask = useRefreshTaskQuery()
+  const refreshDate = useRefreshTaskListByDate()
 
   const today = useMemo(() => new Date(), [])
 
   const handleClickToday = useCallback(
-    (id: string) => async (): Promise<void> => {
-      await moveTaskToday(id)
+    (task: Task) => async (): Promise<void> => {
+      await moveTaskToday(task.id)
+      refreshLeftovers()
+      refreshTask(task.id)
+      refreshDate(dayjsToKey(dayjs(today)))
+      refreshDate(task.todoAt)
     },
-    []
+    [today]
   )
 
   const handleClickRemove = useCallback(
-    (id: string) => async (): Promise<void> => {
-      await removeTask(id)
+    (task: Task) => async (): Promise<void> => {
+      await removeTask(task.id)
+      refreshLeftovers()
+      refreshTask(task.id)
+      refreshDate(task.todoAt)
     },
     []
   )
@@ -42,9 +58,9 @@ export const LeftoverList = () => {
                 </div>
                 <div className={clsx(styles["actions"])}>
                   {!todoAt.isSame(today, "date") && (
-                    <Button onClick={handleClickToday(task.id)}>Today</Button>
+                    <Button onClick={handleClickToday(task)}>Today</Button>
                   )}
-                  <Button onClick={handleClickRemove(task.id)}>Remove</Button>
+                  <Button onClick={handleClickRemove(task)}>Remove</Button>
                 </div>
               </li>
             )
