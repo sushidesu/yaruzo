@@ -1,4 +1,4 @@
-import { selectorFamily } from "recoil"
+import { selectorFamily, useRecoilCallback } from "recoil"
 import { createTaskRepository } from "../infra/kvs/task-repository"
 import type { DateKey } from "./task"
 
@@ -12,6 +12,7 @@ export const taskIdRangeQuery = selectorFamily<
     async () => {
       const taskRepository = createTaskRepository()
 
+      console.info(`QUERY: ${gte} ~ ${lt}`)
       const tasks = await taskRepository.query({
         gte,
         lt,
@@ -20,3 +21,16 @@ export const taskIdRangeQuery = selectorFamily<
       return tasks.map(({ id }) => id)
     },
 })
+
+export const useResetTaskIdRangeQuery = (): ((props: {
+  gte: DateKey
+  lt: DateKey
+}) => void) => {
+  return useRecoilCallback(
+    ({ refresh }) =>
+      (props: { gte: DateKey; lt: DateKey }) => {
+        console.info(`REFRESH: ${props.gte} ~ ${props.lt}`)
+        refresh(taskIdRangeQuery(props))
+      }
+  )
+}

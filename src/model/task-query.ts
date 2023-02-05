@@ -1,4 +1,4 @@
-import { selectorFamily } from "recoil"
+import { selectorFamily, useRecoilCallback } from "recoil"
 import { createTaskRepository } from "../infra/kvs/task-repository"
 import type { Task } from "./task"
 
@@ -11,3 +11,9 @@ export const taskQuery = selectorFamily<Task, string>({
     return task
   },
 })
+
+export const useRefreshTaskQuery = (): ((id: string) => void) => {
+  return useRecoilCallback(({ refresh }) => (id: string) => {
+    refresh(taskQuery(id))
+  })
+}
