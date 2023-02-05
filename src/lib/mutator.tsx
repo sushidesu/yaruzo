@@ -55,4 +55,4 @@ export const MutatorContextProvider = ({
   )
 }
 
-export const useMutatorContext = useContext(MutatorContext)
+export const useMutatorContext = () => useContext(MutatorContext)

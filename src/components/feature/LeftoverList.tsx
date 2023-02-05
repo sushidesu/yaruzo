@@ -29,7 +29,7 @@ export const LeftoverList = () => {
       refreshDate(dayjsToKey(dayjs(today)))
       refreshDate(task.todoAt)
     },
-    [today]
+    [today, refreshLeftovers, refreshTask, refreshDate]
   )
 
   const handleClickRemove = useCallback(
@@ -39,7 +39,7 @@ export const LeftoverList = () => {
       refreshTask(task.id)
       refreshDate(task.todoAt)
     },
-    []
+    [refreshLeftovers, refreshTask, refreshDate]
   )
 
   return (
