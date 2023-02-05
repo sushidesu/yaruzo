@@ -117,9 +117,3 @@ export const useSortableList = <U extends HTMLElement>(
     dragging: target === i,
   }))
 }
-
-const _equals = <T extends { id: string }>(prev: T[], next: T[]): boolean => {
-  const p = prev.reduce((acc, cur) => acc + cur.id, "")
-  const n = next.reduce((acc, cur) => acc + cur.id, "")
-  return p === n
-}
