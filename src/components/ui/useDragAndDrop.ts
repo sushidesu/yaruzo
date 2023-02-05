@@ -36,7 +36,7 @@ export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
       swap(dragTarget, i)
       setDragTarget(i)
     },
-    [dragTarget]
+    [swap, dragTarget]
   )
 
   const onDrop = useCallback<(i: number) => React.DragEventHandler<T>>(
@@ -54,7 +54,7 @@ export const useDragAndDrop = <T extends HTMLElement, P extends { id: string }>(
         reset(newList)
       }
     },
-    [list, previewList, onDropItem]
+    [list, previewList, onDropItem, reset]
   )
 
   const props = useCallback(

@@ -46,7 +46,7 @@ export const Yarukoto = (props: YarukotoProps) => {
 
   const [text, setText] = useState("")
 
-  const [_list, reset] = useDragAndDrop<HTMLLIElement, Task>(
+  const [_list, _reset] = useDragAndDrop<HTMLLIElement, Task>(
     todayTasks,
     useCallback(async (newList) => {
       await updateOrders(newList.map((t) => t.id))
@@ -59,7 +59,7 @@ export const Yarukoto = (props: YarukotoProps) => {
   useEffect(() => {
     // 表示する日付が変わったらpreviewリストをresetする (ページ遷移時)
     // 本当にこれでいいのかわからないけど想定通りの動作はする
-    reset(todayTasks)
+    // reset(todayTasks)
   }, [todayKey.gte, todayKey.lt])
 
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
@@ -75,11 +75,12 @@ export const Yarukoto = (props: YarukotoProps) => {
       if (text === "") return
 
       await createTaskToday(text)
+      refreshTasks(dayjsToKey(today))
       // const n = await mutate()
       // if (n) reset(n)
       setText("")
     },
-    [text, refreshTasks]
+    [text, today, refreshTasks]
   )
 
   const handleRemove = useCallback(
@@ -89,7 +90,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       // if (n) reset(n)
       refreshTasks(dayjsToKey(today))
     },
-    [refreshTasks]
+    [refreshTasks, today]
   )
 
   const handleToggleComplete = useCallback(
@@ -123,7 +124,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       refreshTasks(dayjsToKey(nextDay))
       refreshTask(id)
     },
-    [refreshTasks]
+    [refreshTasks, refreshTask, today, nextDay]
   )
 
   const handleClickMovePrev = useCallback(
@@ -135,7 +136,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       refreshTasks(dayjsToKey(today))
       refreshTask(id)
     },
-    [refreshTasks]
+    [refreshTasks, refreshTask, prevDay, today]
   )
 
   const isToday = dayjs().isSame(today, "date")

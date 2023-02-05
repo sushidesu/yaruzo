@@ -7,10 +7,17 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "prettier"
   ],
   "plugins": ["unused-imports", "simple-import-sort"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
+    "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "off",
