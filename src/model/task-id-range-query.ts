@@ -8,7 +8,7 @@ export const taskIdRangeQuery = selectorFamily<string[], DateKey>({
   get: (key) => async () => {
     const taskRepository = createTaskRepository()
 
-    console.log(`reset date ${key}`)
+    console.log(`query range ${key}`)
     const tasks = await taskRepository.query({
       gte: key,
       lt: dayjsToKey(keyToDayjs(key).add(1, "day")),
