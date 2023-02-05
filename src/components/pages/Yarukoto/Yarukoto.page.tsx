@@ -1,10 +1,11 @@
-import type { YarukotoPageProps } from "./yarukoto-page-props"
-import { Yarukoto } from "./Yarukoto"
-import { Layout } from "../../ui/Layout"
-import { Header } from "../../ui/Header"
-import { Footer } from "../../ui/Footer"
 import { Suspense } from "react"
+
 import type { DateKey } from "../../../model/task"
+import { Footer } from "../../ui/Footer"
+import { Header } from "../../ui/Header"
+import { Layout } from "../../ui/Layout"
+import { Yarukoto } from "./Yarukoto"
+import type { YarukotoPageProps } from "./yarukoto-page-props"
 
 export const YarukotoPage = ({ dateKey }: YarukotoPageProps) => {
   if (!isDateKey(dateKey)) {

@@ -1,4 +1,5 @@
 import { selector } from "recoil"
+
 import { createTaskRepository } from "../infra/kvs/task-repository"
 
 export const taskIdRangeLeftoverQuery = selector<string[]>({

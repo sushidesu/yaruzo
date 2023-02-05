@@ -1,10 +1,11 @@
-import { selector, useRecoilValue, waitForAll } from "recoil"
-import { Task, dayjsToKey } from "./task"
-import { selectedMonthAtom } from "./selected-month-atom"
-import { taskQuery } from "./task-query"
-import { taskIdRangeQuery } from "./task-id-range-query"
 import dayjs from "dayjs"
+import { selector, useRecoilValue, waitForAll } from "recoil"
+
 import { range } from "../utils/range"
+import { selectedMonthAtom } from "./selected-month-atom"
+import { dayjsToKey, Task } from "./task"
+import { taskIdRangeQuery } from "./task-id-range-query"
+import { taskQuery } from "./task-query"
 
 export const taskListByMonthQuery = selector<Task[]>({
   key: "taskListByMonthQuery",

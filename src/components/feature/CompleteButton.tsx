@@ -1,5 +1,6 @@
-import styles from "./CompleteButton.module.css"
 import clsx from "clsx"
+
+import styles from "./CompleteButton.module.css"
 
 type CompleteButtonProps = {
   complete: boolean
