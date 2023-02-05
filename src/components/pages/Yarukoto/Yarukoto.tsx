@@ -69,8 +69,9 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async () => {
       await removeTask(id)
       refreshTasks(dayjsToKey(today))
+      refreshLeftovers()
     },
-    [refreshTasks, today]
+    [refreshTasks, refreshLeftovers, today]
   )
 
   const handleToggleComplete = useCallback(
