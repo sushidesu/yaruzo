@@ -10,6 +10,7 @@ import {
 } from "../../../model/selected-month-atom"
 import { useTaskListByMonth } from "../../../model/task-list-by-month-query"
 import { Button } from "../../ui/Button"
+import { range } from "../../../utils/range"
 
 export const Home = () => {
   const today = dayjs()
@@ -63,10 +64,4 @@ export const Home = () => {
       </div>
     </div>
   )
-}
-
-function* range(start: number, end: number): Generator<number, void, unknown> {
-  for (let i = start; i < end; i++) {
-    yield i
-  }
 }
