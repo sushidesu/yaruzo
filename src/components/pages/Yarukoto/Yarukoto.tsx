@@ -121,6 +121,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       // if (n) reset(n)
       refreshTasks(dayjsToKey(today))
       refreshTasks(dayjsToKey(nextDay))
+      refreshTask(id)
     },
     [refreshTasks]
   )
@@ -132,6 +133,7 @@ export const Yarukoto = (props: YarukotoProps) => {
       // if (n) reset(n)
       refreshTasks(dayjsToKey(prevDay))
       refreshTasks(dayjsToKey(today))
+      refreshTask(id)
     },
     [refreshTasks]
   )
