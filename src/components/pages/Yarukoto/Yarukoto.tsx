@@ -112,9 +112,10 @@ export const Yarukoto = (props: YarukotoProps) => {
         refreshTasks(dayjsToKey(today))
         refreshTasks(dayjsToKey(nextDay))
         refreshTask(id)
+        refreshLeftovers()
       })
     },
-    [refreshTasks, refreshTask, today, nextDay]
+    [refreshTasks, refreshTask, refreshLeftovers, today, nextDay]
   )
 
   const handleClickMovePrev = useCallback(
@@ -124,9 +125,10 @@ export const Yarukoto = (props: YarukotoProps) => {
         refreshTasks(dayjsToKey(prevDay))
         refreshTasks(dayjsToKey(today))
         refreshTask(id)
+        refreshLeftovers()
       })
     },
-    [refreshTasks, refreshTask, prevDay, today]
+    [refreshTasks, refreshTask, refreshLeftovers, prevDay, today]
   )
 
   const isToday = dayjs().isSame(today, "date")
