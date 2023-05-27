@@ -10,6 +10,7 @@
     "lint": "eslint --fix src",
     "lint:style": "stylelint \"src/**/*.css\" --fix",
     "format": "prettier --write src",
+    "fmt": "pnpm lint && pnpm lint:style && pnpm format",
     "prepare": "husky install"
   },
   "dependencies": {
