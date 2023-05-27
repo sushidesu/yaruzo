@@ -1,5 +1,9 @@
 import React, { useCallback } from "react"
-import { atomFamily, selectorFamily, useRecoilState } from "recoil"
+import {
+  atomFamily,
+  selectorFamily,
+  useRecoilState_TRANSITION_SUPPORT_UNSTABLE,
+} from "recoil"
 
 import type { DateKey, Task } from "./task"
 import { taskListByDateQuery } from "./task-list-by-date"
@@ -39,8 +43,12 @@ export const useSortableList = <U extends HTMLElement>(
   date: DateKey,
   onDropItem?: (sorted: Task[]) => Promise<void> | void
 ): SortableItem<Task, U>[] => {
-  const [target, setTarget] = useRecoilState(dragTarget(date))
-  const [list, setList] = useRecoilState(taskSortableList(date))
+  const [target, setTarget] = useRecoilState_TRANSITION_SUPPORT_UNSTABLE(
+    dragTarget(date)
+  )
+  const [list, setList] = useRecoilState_TRANSITION_SUPPORT_UNSTABLE(
+    taskSortableList(date)
+  )
 
   const swap = useCallback(
     (left: number, right: number) => {

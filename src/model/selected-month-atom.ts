@@ -1,7 +1,11 @@
 import dayjs from "dayjs"
 import ObjectSupport from "dayjs/plugin/objectSupport"
 import { useCallback, useMemo } from "react"
-import { atom, useRecoilValue, useSetRecoilState } from "recoil"
+import {
+  atom,
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
+  useSetRecoilState,
+} from "recoil"
 
 import { createTimeStamp, now, Timestamp } from "./task"
 
@@ -38,5 +42,5 @@ export const useChangeSelectedMonth = (): {
 }
 
 export const useSelectedMonth = (): Timestamp => {
-  return useRecoilValue(selectedMonthAtom)
+  return useRecoilValue_TRANSITION_SUPPORT_UNSTABLE(selectedMonthAtom)
 }
