@@ -1,6 +1,6 @@
 import { clsx } from "clsx"
 import dayjs from "dayjs"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useTransition } from "react"
 
 import { dayjsToKey, keyToDayjs, Task } from "../../model/task"
 import { useRefreshTaskListByDate } from "../../model/task-list-by-date"
@@ -14,6 +14,9 @@ import { Button } from "../ui/Button"
 import styles from "./LeftoverList.module.css"
 
 export const LeftoverList = () => {
+  const [moving, startMoveTask] = useTransition()
+  const [removing, startRemoveTask] = useTransition()
+
   const leftovers = useLeftoverTaskList()
   const refreshLeftovers = useRefreshLeftoverTaskList()
   const refreshTask = useRefreshTaskQuery()
@@ -24,10 +27,12 @@ export const LeftoverList = () => {
   const handleClickToday = useCallback(
     (task: Task) => async (): Promise<void> => {
       await moveTaskToday(task.id)
-      refreshLeftovers()
-      refreshTask(task.id)
-      refreshDate(dayjsToKey(dayjs(today)))
-      refreshDate(task.todoAt)
+      startMoveTask(() => {
+        refreshLeftovers()
+        refreshTask(task.id)
+        refreshDate(dayjsToKey(dayjs(today)))
+        refreshDate(task.todoAt)
+      })
     },
     [today, refreshLeftovers, refreshTask, refreshDate]
   )
@@ -58,7 +63,9 @@ export const LeftoverList = () => {
                 </div>
                 <div className={clsx(styles["actions"])}>
                   {!todoAt.isSame(today, "date") && (
-                    <Button onClick={handleClickToday(task)}>Today</Button>
+                    <Button loading={moving} onClick={handleClickToday(task)}>
+                      Today
+                    </Button>
                   )}
                   <Button onClick={handleClickRemove(task)}>Remove</Button>
                 </div>

@@ -1,6 +1,11 @@
 import { clsx } from "clsx"
 import dayjs from "dayjs"
-import React, { useCallback, useState } from "react"
+import React, {
+  startTransition,
+  useCallback,
+  useState,
+  useTransition,
+} from "react"
 import { Link } from "rocon/react"
 
 import { routes_y } from "../../../app/Router"
@@ -44,6 +49,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const refreshTask = useRefreshTaskQuery()
   const refreshLeftovers = useRefreshLeftoverTaskList()
 
+  const [submitting, startSubmit] = useTransition()
+  const [removing, startRemoving] = useTransition()
+  const [updatingStatus, startUpdateStatus] = useTransition()
+
   const [text, setText] = useState("")
 
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
@@ -59,7 +68,9 @@ export const Yarukoto = (props: YarukotoProps) => {
       if (text === "") return
 
       await createTaskToday(text)
-      refreshTasks(dayjsToKey(today))
+      startSubmit(() => {
+        refreshTasks(dayjsToKey(today))
+      })
       setText("")
     },
     [text, today, refreshTasks]
@@ -68,8 +79,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleRemove = useCallback(
     (id: string) => async () => {
       await removeTask(id)
-      refreshTasks(dayjsToKey(today))
-      refreshLeftovers()
+      startRemoving(() => {
+        refreshTasks(dayjsToKey(today))
+        refreshLeftovers()
+      })
     },
     [refreshTasks, refreshLeftovers, today]
   )
@@ -77,8 +90,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleToggleComplete = useCallback(
     (id: string) => async () => {
       await toggleCompleteTask(id)
-      refreshTask(id)
-      refreshLeftovers()
+      startUpdateStatus(() => {
+        refreshTask(id)
+        refreshLeftovers()
+      })
     },
     [refreshTask]
   )
@@ -87,7 +102,9 @@ export const Yarukoto = (props: YarukotoProps) => {
     (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
-        refreshTask(id)
+        startTransition(() => {
+          refreshTask(id)
+        })
       }
     },
     [refreshTask]
@@ -96,9 +113,11 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
-      refreshTasks(dayjsToKey(today))
-      refreshTasks(dayjsToKey(nextDay))
-      refreshTask(id)
+      startTransition(() => {
+        refreshTasks(dayjsToKey(today))
+        refreshTasks(dayjsToKey(nextDay))
+        refreshTask(id)
+      })
     },
     [refreshTasks, refreshTask, today, nextDay]
   )
@@ -106,9 +125,11 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
       await moveTaskPrev(id)
-      refreshTasks(dayjsToKey(prevDay))
-      refreshTasks(dayjsToKey(today))
-      refreshTask(id)
+      startTransition(() => {
+        refreshTasks(dayjsToKey(prevDay))
+        refreshTasks(dayjsToKey(today))
+        refreshTask(id)
+      })
     },
     [refreshTasks, refreshTask, prevDay, today]
   )
@@ -135,7 +156,7 @@ export const Yarukoto = (props: YarukotoProps) => {
         </div>
         <form className={styles["form"]} onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
-          <Button variant={"primary"} type={"submit"}>
+          <Button variant={"primary"} type={"submit"} loading={submitting}>
             ADD
           </Button>
         </form>
