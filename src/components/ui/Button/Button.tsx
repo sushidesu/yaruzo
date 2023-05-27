@@ -5,16 +5,17 @@ import styles from "./Button.module.css"
 
 type ButtonProps = {
   variant?: "default" | "primary" | "secondary" | "danger"
+  loading?: boolean | undefined
 } & Omit<ComponentProps<"button">, "className">
 
 const _Button: ForwardRefRenderFunction<HTMLButtonElement, ButtonProps> = (
-  props,
+  { variant, loading = false, ...rest },
   ref
 ): JSX.Element => {
-  const { variant, ...rest } = props
   return (
     <button
       className={clsx(styles["wrapper"], styles[variant ?? "default"])}
+      disabled={rest.disabled || loading}
       ref={ref}
       {...rest}
     />
