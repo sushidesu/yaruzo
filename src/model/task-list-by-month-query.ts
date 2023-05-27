@@ -1,5 +1,9 @@
 import dayjs from "dayjs"
-import { selector, useRecoilValue, waitForAll } from "recoil"
+import {
+  selector,
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
+  waitForAll,
+} from "recoil"
 
 import { range } from "../utils/range"
 import { selectedMonthAtom } from "./selected-month-atom"
@@ -31,5 +35,5 @@ export const taskListByMonthQuery = selector<Task[]>({
 })
 
 export const useTaskListByMonth = (): Task[] => {
-  return useRecoilValue(taskListByMonthQuery)
+  return useRecoilValue_TRANSITION_SUPPORT_UNSTABLE(taskListByMonthQuery)
 }

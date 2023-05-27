@@ -1,4 +1,9 @@
-import { selector, useRecoilCallback, useRecoilValue, waitForAll } from "recoil"
+import {
+  selector,
+  useRecoilCallback,
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
+  waitForAll,
+} from "recoil"
 
 import type { Task } from "./task"
 import { taskIdRangeLeftoverQuery } from "./task-id-range-leftover-query"
@@ -14,7 +19,8 @@ export const leftoverTaskListQuery = selector<Task[]>({
 })
 
 export const useLeftoverTaskList = (): Task[] =>
-  useRecoilValue(leftoverTaskListQuery)
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE(leftoverTaskListQuery)
+// useRecoilValue(leftoverTaskListQuery)
 
 export const useRefreshLeftoverTaskList = () => {
   return useRecoilCallback(({ refresh }) => () => {

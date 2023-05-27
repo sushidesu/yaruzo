@@ -1,7 +1,7 @@
 import {
   selectorFamily,
   useRecoilCallback,
-  useRecoilValue,
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
   waitForAll,
 } from "recoil"
 
@@ -22,7 +22,7 @@ export const taskListByDateQuery = selectorFamily<Task[], DateKey>({
 })
 
 export const useTaskListByDate = (date: DateKey): Task[] => {
-  return useRecoilValue(taskListByDateQuery(date))
+  return useRecoilValue_TRANSITION_SUPPORT_UNSTABLE(taskListByDateQuery(date))
 }
 
 export const useRefreshTaskListByDate = () => {

@@ -1,6 +1,6 @@
 import { clsx } from "clsx"
 import dayjs from "dayjs"
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useState, useTransition } from "react"
 import { Link } from "rocon/react"
 
 import { routes_y } from "../../../app/Router"
@@ -44,6 +44,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const refreshTask = useRefreshTaskQuery()
   const refreshLeftovers = useRefreshLeftoverTaskList()
 
+  const [submitting, startSubmit] = useTransition()
+  const [removing, startRemoving] = useTransition()
+  const [updatingStatus, startUpdateStatus] = useTransition()
+
   const [text, setText] = useState("")
 
   const handleChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
@@ -59,7 +63,9 @@ export const Yarukoto = (props: YarukotoProps) => {
       if (text === "") return
 
       await createTaskToday(text)
-      refreshTasks(dayjsToKey(today))
+      startSubmit(() => {
+        refreshTasks(dayjsToKey(today))
+      })
       setText("")
     },
     [text, today, refreshTasks]
@@ -68,8 +74,10 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleRemove = useCallback(
     (id: string) => async () => {
       await removeTask(id)
-      refreshTasks(dayjsToKey(today))
-      refreshLeftovers()
+      startRemoving(() => {
+        refreshTasks(dayjsToKey(today))
+        refreshLeftovers()
+      })
     },
     [refreshTasks, refreshLeftovers, today]
   )
@@ -77,17 +85,21 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleToggleComplete = useCallback(
     (id: string) => async () => {
       await toggleCompleteTask(id)
-      refreshTask(id)
-      refreshLeftovers()
+      startUpdateStatus(() => {
+        refreshTask(id)
+        refreshLeftovers()
+      })
     },
-    [refreshTask]
+    [refreshTask, refreshLeftovers]
   )
 
   const handleRename = useCallback(
     (id: string) => async (e: React.FocusEvent<HTMLParagraphElement>) => {
       if (e.currentTarget.textContent !== null) {
         await renameTask(id, e.currentTarget.textContent)
-        refreshTask(id)
+        startUpdateStatus(() => {
+          refreshTask(id)
+        })
       }
     },
     [refreshTask]
@@ -96,9 +108,11 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMoveNext = useCallback(
     (id: string) => async () => {
       await moveTaskNext(id)
-      refreshTasks(dayjsToKey(today))
-      refreshTasks(dayjsToKey(nextDay))
-      refreshTask(id)
+      startUpdateStatus(() => {
+        refreshTasks(dayjsToKey(today))
+        refreshTasks(dayjsToKey(nextDay))
+        refreshTask(id)
+      })
     },
     [refreshTasks, refreshTask, today, nextDay]
   )
@@ -106,9 +120,11 @@ export const Yarukoto = (props: YarukotoProps) => {
   const handleClickMovePrev = useCallback(
     (id: string) => async () => {
       await moveTaskPrev(id)
-      refreshTasks(dayjsToKey(prevDay))
-      refreshTasks(dayjsToKey(today))
-      refreshTask(id)
+      startUpdateStatus(() => {
+        refreshTasks(dayjsToKey(prevDay))
+        refreshTasks(dayjsToKey(today))
+        refreshTask(id)
+      })
     },
     [refreshTasks, refreshTask, prevDay, today]
   )
@@ -135,7 +151,7 @@ export const Yarukoto = (props: YarukotoProps) => {
         </div>
         <form className={styles["form"]} onSubmit={handleSubmit}>
           <input value={text} onChange={handleChange} />
-          <Button variant={"primary"} type={"submit"}>
+          <Button variant={"primary"} type={"submit"} loading={submitting}>
             ADD
           </Button>
         </form>
@@ -178,9 +194,13 @@ export const Yarukoto = (props: YarukotoProps) => {
                   name={task.name}
                   completedAt={task.completedAt}
                   onClickRemove={handleRemove(task.id)}
+                  loadingRemove={removing}
                   onClickCheck={handleToggleComplete(task.id)}
+                  loadingCheck={updatingStatus}
                   onClickMoveNext={handleClickMoveNext(task.id)}
+                  loadingMoveNext={updatingStatus}
                   onClickMovePrev={handleClickMovePrev(task.id)}
+                  loadingMovePrev={updatingStatus}
                   onBlurName={handleRename(task.id)}
                 />
               </li>
@@ -211,9 +231,13 @@ type ItemProps = {
   name: string
   completedAt: number | undefined
   onClickRemove: () => void
+  loadingRemove?: boolean
   onClickCheck: () => void
+  loadingCheck?: boolean
   onClickMoveNext: () => void
+  loadingMoveNext?: boolean
   onClickMovePrev: () => void
+  loadingMovePrev?: boolean
   onBlurName: React.FocusEventHandler<HTMLParagraphElement>
 }
 
@@ -222,15 +246,23 @@ const Item = (props: ItemProps): JSX.Element => {
     name,
     completedAt,
     onClickRemove,
+    loadingRemove,
     onClickCheck,
+    loadingCheck,
     onClickMoveNext,
+    loadingMoveNext,
     onClickMovePrev,
+    loadingMovePrev,
     onBlurName,
   } = props
   const done = completedAt !== undefined && completedAt <= Date.now()
   return (
     <div className={clsx(styles["item"])}>
-      <CompleteButton complete={done} onClick={onClickCheck} />
+      <CompleteButton
+        complete={done}
+        onClick={onClickCheck}
+        loading={loadingCheck}
+      />
       {done ? (
         <p className={clsx(styles["item-name"], styles["completed"])}>{name}</p>
       ) : (
@@ -244,15 +276,19 @@ const Item = (props: ItemProps): JSX.Element => {
         </p>
       )}
       <div className={clsx(styles["item-actions"])}>
-        <Button onClick={onClickRemove}>REMOVE</Button>
+        <Button onClick={onClickRemove} loading={loadingRemove}>
+          REMOVE
+        </Button>
         <Button
           onClick={onClickMovePrev}
+          loading={loadingMovePrev}
           aria-label={"Move task to the previous day"}
         >
           ←
         </Button>
         <Button
           onClick={onClickMoveNext}
+          loading={loadingMoveNext}
           aria-label={"Move task to the next day"}
         >
           →
