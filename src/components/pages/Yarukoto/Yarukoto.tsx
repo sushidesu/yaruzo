@@ -90,7 +90,7 @@ export const Yarukoto = (props: YarukotoProps) => {
         refreshLeftovers()
       })
     },
-    [refreshTask]
+    [refreshTask, refreshLeftovers]
   )
 
   const handleRename = useCallback(

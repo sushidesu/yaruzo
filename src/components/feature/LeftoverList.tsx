@@ -40,9 +40,11 @@ export const LeftoverList = () => {
   const handleClickRemove = useCallback(
     (task: Task) => async (): Promise<void> => {
       await removeTask(task.id)
-      refreshLeftovers()
-      refreshTask(task.id)
-      refreshDate(task.todoAt)
+      startRemoveTask(() => {
+        refreshLeftovers()
+        refreshTask(task.id)
+        refreshDate(task.todoAt)
+      })
     },
     [refreshLeftovers, refreshTask, refreshDate]
   )
@@ -67,7 +69,9 @@ export const LeftoverList = () => {
                       Today
                     </Button>
                   )}
-                  <Button onClick={handleClickRemove(task)}>Remove</Button>
+                  <Button loading={removing} onClick={handleClickRemove(task)}>
+                    Remove
+                  </Button>
                 </div>
               </li>
             )
